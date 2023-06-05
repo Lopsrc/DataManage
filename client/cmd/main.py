@@ -59,10 +59,9 @@ def count_price_of_the_day(time_work, penalty):
         return fix_price_of_the_day/2-penalty
     return fix_price_of_the_day-penalty
 
-def get_all_record():
+def getRecordId():
     pass
-def get_record():
-    pass
+
 
 def table_01(id_table, token_):
     action = int(input("Select action (1. Create new record, 2. Update record, 3. Delete record): "))
@@ -72,7 +71,7 @@ def table_01(id_table, token_):
         penalty = int(input("Enter penalty(0 or other num): "))
         price = count_price_of_the_day(time_work, penalty)
 
-        response = dbWork.create_entry(id_table,token_,date, price, time_work, penalty)
+        response = dbWork.createRecordToWorkspace(id_table,token_,date, price, time_work, penalty)
         if response.status_code == 200:
             print('Запись успешно создана')
         else:
@@ -82,17 +81,17 @@ def table_01(id_table, token_):
         time_work = int(input("Enter time of work(8 or 4): "))
         penalty = int(input("Enter penalty(0 or other num): "))
         price = count_price_of_the_day(time_work, penalty)
-        enter_id = get_record()
+        record_id = 1#getRecordId()
 
-        response = dbWork.update_entry(id_table, token_,enter_id, date, price, time_work, penalty)
+        response = dbWork.updateRecordToWorkspace(id_table, token_,record_id, date, price, time_work, penalty)
         if response.status_code == 200:
             print('Запись успешно создана')
         else:
             print('Ошибка при создании записи:', response.text, response.status_code)
     elif action==3:
-        entry_id = 3  # Идентификатор записи, которую нужно удалить
+        record_id = 1  # Идентификатор записи, которую нужно удалить
 
-        response = dbWork.delete_entry(id_table, entry_id, token_)
+        response = dbWork.deleteRecordToWorkspace(id_table, record_id, token_)
         if response.status_code == 200:
             print('Запись успешно удалена')
         else:
@@ -101,28 +100,68 @@ def table_01(id_table, token_):
 
 
 def table_02(id_table, token_):
-    date = str(input("Enter date(yyyy-mm-dd): "))
-    time_work = int(input("Enter time of work(8 or 4): "))
-    penalty = int(input("Enter penalty(0 or other num): "))
-    price = count_price_of_the_day(time_work, penalty)
-    response = dbWork.create_entry(token_,date, price, time_work, penalty, )
-    if response.status_code == 200:
-        print('Запись успешно создана')
-    else:
-        print('Ошибка при создании записи:', response.text, response.status_code)
+    action = int(input("Select action (1. Create new record, 2. Update record, 3. Delete record): "))
+    if action==1:
+        date = str(input("Enter date(yyyy-mm-dd): "))
+        price = int(input("Enter price of the day(3200): "))
+
+        response = dbWork.createRecordToListPrices(id_table,token_,date, price)
+        if response.status_code == 200:
+            print('Запись успешно создана')
+        else:
+            print('Ошибка при создании записи:', response.text, response.status_code)
+    elif action==2:
+        date = str(input("Enter date(yyyy-mm-dd): "))
+        
+        price = int(input("Enter price of the day(3200): "))
+        record_id = 1#getRecordId()
+
+        response = dbWork.updateRecordToListPrices(id_table, token_,record_id, date, price)
+        if response.status_code == 200:
+            print('Запись успешно создана')
+        else:
+            print('Ошибка при создании записи:', response.text, response.status_code)
+    elif action==3:
+        record_id = 1  # Идентификатор записи, которую нужно удалить
+
+        response = dbWork.deleteRecordToListPrices(id_table, record_id, token_)
+        if response.status_code == 200:
+            print('Запись успешно удалена')
+        else:
+            print('Ошибка при удалении записи:', response.text)
 
 
 
 def table_03(id_table, token_):
-    date = str(input("Enter date(yyyy-mm-dd): "))
-    time_work = int(input("Enter time of work(8 or 4): "))
-    penalty = int(input("Enter penalty(0 or other num): "))
-    price = count_price_of_the_day(time_work, penalty)
-    response = dbWork.create_entry(token_,date, price, time_work, penalty, )
-    if response.status_code == 200:
-        print('Запись успешно создана')
-    else:
-        print('Ошибка при создании записи:', response.text, response.status_code)
+    action = int(input("Select action (1. Create new record, 2. Update record, 3. Delete record): "))
+    if action==1:
+        date = str(input("Enter date(yyyy-mm-dd): "))
+        price = int(input("Enter price of the day(3200): "))
+
+        response = dbWork.createRecordToListPayments(id_table,token_,date, price)
+        if response.status_code == 200:
+            print('Запись успешно создана')
+        else:
+            print('Ошибка при создании записи:', response.text, response.status_code)
+    elif action==2:
+        date = str(input("Enter date(yyyy-mm-dd): "))
+        
+        price = int(input("Enter price of the day(3200): "))
+        record_id = 1#getRecordId()
+
+        response = dbWork.updateRecordToListPrices(id_table, token_,record_id, date, price)
+        if response.status_code == 200:
+            print('Запись успешно создана')
+        else:
+            print('Ошибка при создании записи:', response.text, response.status_code)
+    elif action==3:
+        record_id = 1  # Идентификатор записи, которую нужно удалить
+
+        response = dbWork.deleteRecordToListPrices(id_table, record_id, token_)
+        if response.status_code == 200:
+            print('Запись успешно удалена')
+        else:
+            print('Ошибка при удалении записи:', response.text)
 
 
 
