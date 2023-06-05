@@ -19,16 +19,25 @@ const (
 	dbname   = "postgres"
 )
 
-type Entry struct {
+type ListPayments struct {
 	ID       int    `json:"id"`
-	ID_table int 	`json:"id_table"`
+	Date     string `json:"Date"`
+	PriceDay int 	`json:"Payments"`
 	Token    string `json:"token"`
+}
+type ListPrices struct{
+	ID       int    `json:"id"`
 	Date     string `json:"date"`
+	Price 	 int 	`json:"price_day"`
+	Token    string `json:"token"`
+}
+type Workspace struct{
+	ID       int    `json:"id"`
+	Date     string `json:"work_date"`
 	Price    int    `json:"price"`
 	TimeWork int    `json:"time_work"`
 	Penalty  int    `json:"penalty"`
-	Payments int    `json:"payments"`
-	
+	Token    string `json:"token"`
 }
 
 var db *sql.DB
@@ -50,19 +59,19 @@ func main() {
 	router := mux.NewRouter()
 
 	// Установка обработчиков запросов
-	router.HandleFunc("/entry", createRecordFromWorkspace).Methods("POST")
+	router.HandleFunc("/workspace", createRecordFromWorkspace).Methods("POST")
 	router.HandleFunc("/price", createRecordFromListPrice).Methods("POST")
 	router.HandleFunc("/payments", createRecordFromListPayment).Methods("POST")
 
-	router.HandleFunc("/entry", updateRecordFromWorkspace).Methods("PUT")
+	router.HandleFunc("/workspace", updateRecordFromWorkspace).Methods("PUT")
 	router.HandleFunc("/price", updateRecordFromListPrice).Methods("PUT")
 	router.HandleFunc("/payments", updateRecordFromListPayments).Methods("PUT")
 
-	router.HandleFunc("/entry", deleteRecordFromWorkspace).Methods("DELETE")
+	router.HandleFunc("/workspace", deleteRecordFromWorkspace).Methods("DELETE")
 	router.HandleFunc("/price", deleteRecordFromListPrice).Methods("DELETE")
 	router.HandleFunc("/payments", deleteRecordFromListPayments).Methods("DELETE")
 
-	router.HandleFunc("/entry", getAllRecords).Methods("GET") // Новый обработчик для получения всех записей
+	router.HandleFunc("/workspace", getAllRecords).Methods("GET") // Новый обработчик для получения всех записей
 	router.HandleFunc("/price", getAllRecordsFromListPrice).Methods("GET")       // Обработчик для получения всех записей из таблицы "list_of_price"
 	router.HandleFunc("/payments", getAllRecordsFromListPayments).Methods("GET") // Обработчик для получения всех записей из таблицы "list_of_payments"
 	// Запуск сервера на порту 8080
@@ -70,295 +79,8 @@ func main() {
 }
 
 
-// func createEntry(w http.ResponseWriter, r *http.Request) {
-// 	// Чтение и декодирование JSON из запроса
-	
-// 	var entry Entry
-// 	err := json.NewDecoder(r.Body).Decode(&entry)
-// 	if err != nil {
-// 		print(err.Error())
-// 		w.WriteHeader(http.StatusBadRequest)
-// 		return
-// 	}
-
-// 	// Проверка валидности токена
-// 	if !isValidToken(entry.Token) {
-// 		w.WriteHeader(http.StatusUnauthorized)
-// 		return
-// 	}
-	
-// 	switch entry.ID_table {
-// 		case 1: // Добавление данных в бд таблица 1
-// 			err = insertEntryToDB(entry)
-// 			if err != nil {
-// 				print(err.Error())
-// 				w.WriteHeader(http.StatusInternalServerError)
-// 				return
-// 			}
-// 		case 2: // Добавление данных в бд таблица 2
-// 		err = insertEntryToDBtoListPrices(entry)
-// 		if err != nil {
-// 			print(err.Error())
-// 			w.WriteHeader(http.StatusInternalServerError)
-// 			return
-// 			}
-// 		case 3: // Добавление данных в бд таблица 3
-// 		err = insertEntryToDBtoListPayments(entry)
-// 		if err != nil {
-// 			print(err.Error())
-// 			w.WriteHeader(http.StatusInternalServerError)
-// 			return
-// 			}
-// 		}
-
-
-// 	w.WriteHeader(http.StatusOK)
-// }
-
-// func insertEntryToDB(entry Entry) error {
-// 	print("begin")
-// 	stmt, err := db.Prepare("INSERT INTO maloesareevo (work_date, price, time_work, penalty) VALUES ($1, $2, $3, $4)")
-// 	if err != nil {
-// 		print(err.Error())
-// 		return err
-// 	}
-// 	defer stmt.Close()
-// 	print("such")
-// 	_, err = stmt.Exec(entry.Date, entry.Price, entry.TimeWork, entry.Penalty)
-// 	if err != nil {
-// 		print(err.Error())
-// 		return err
-// 	}
-
-// 	return nil
-// }
-
-// func insertEntryToDBtoListPrices(entry Entry) error {
-// 	print("begin")
-// 	stmt, err := db.Prepare("INSERT INTO list_of_price (date_change, price_day) VALUES ($1, $2)")
-// 	if err != nil {
-// 		print(err.Error())
-// 		return err
-// 	}
-// 	defer stmt.Close()
-// 	print("such")
-// 	_, err = stmt.Exec(entry.Date, entry.Price)
-// 	if err != nil {
-// 		print(err.Error())
-// 		return err
-// 	}
-
-// 	return nil
-// }
-
-// func insertEntryToDBtoListPayments(entry Entry) error {
-// 	print("begin")
-// 	stmt, err := db.Prepare("INSERT INTO list_of_payments (payment_date, price) VALUES ($1, $2)")
-// 	if err != nil {
-// 		print(err.Error())
-// 		return err
-// 	}
-// 	defer stmt.Close()
-// 	print("such")
-// 	_, err = stmt.Exec(entry.Date, entry.Price)
-// 	if err != nil {
-// 		print(err.Error())
-// 		return err
-// 	}
-
-// 	return nil
-// }
-
-// func updateEntry(w http.ResponseWriter, r *http.Request) {
-// 	// Чтение и декодирование JSON из запроса
-// 	var entry Entry
-// 	err := json.NewDecoder(r.Body).Decode(&entry)
-// 	if err != nil {
-// 		print(err.Error())
-// 		w.WriteHeader(http.StatusBadRequest)
-// 		return
-// 	}
-
-// 	// Проверка валидности токена
-// 	if !isValidToken(entry.Token) {
-// 		w.WriteHeader(http.StatusUnauthorized)
-// 		return
-// 	}
-
-// 	// Обновление данных в базе данных
-// 	switch entry.ID_table {
-// 		case 1: // Обновление данных в бд таблица 1
-// 			err = updateEntryInDB(entry)
-// 			if err != nil {
-// 				w.WriteHeader(http.StatusInternalServerError)
-// 				print(err.Error())
-// 				return
-// 			}
-// 		case 2: // Обновление данных в бд таблица 2
-// 		err = updateEntryInDBtoListPrices(entry)
-// 		if err != nil {
-// 			w.WriteHeader(http.StatusInternalServerError)
-// 			print(err.Error())
-// 			return
-// 			}
-// 		case 3: // Обновление данных в бд таблица 3
-// 		err = updateEntryInDBtoListPayments(entry)
-// 		if err != nil {
-// 			w.WriteHeader(http.StatusInternalServerError)
-// 			print(err.Error())
-// 			return
-// 			}
-// 	}
-
-// 	w.WriteHeader(http.StatusOK)
-// }
-
-// func updateEntryInDB(entry Entry) error {
-// 	stmt, err := db.Prepare("UPDATE maloesareevo SET work_date = $1, price = $2, time_work = $3, penalty = $4 WHERE id = $5")
-// 	if err != nil {
-// 		print(err.Error())
-// 		return err
-// 	}
-// 	defer stmt.Close()
-
-// 	_, err = stmt.Exec(entry.Date, entry.Price, entry.TimeWork, entry.Penalty, entry.ID)
-// 	if err != nil {
-// 		print(err.Error())
-// 		return err
-// 	}
-
-// 	return nil
-// }
-
-// func updateEntryInDBtoListPrices(entry Entry) error {
-// 	stmt, err := db.Prepare("UPDATE list_of_price SET date_change = $1, price_day = $2 WHERE id = $3")
-// 	if err != nil {
-// 		print(err.Error())
-// 		return err
-// 	}
-// 	defer stmt.Close()
-
-// 	_, err = stmt.Exec(entry.Date, entry.Price, entry.ID)
-// 	if err != nil {
-// 		print(err.Error())
-// 		return err
-// 	}
-
-// 	return nil
-// }
-
-// func updateEntryInDBtoListPayments(entry Entry) error {
-// 	stmt, err := db.Prepare("UPDATE list_of_payments SET payment_date = $1, price = $2 WHERE id = $3")
-// 	if err != nil {
-// 		print(err.Error())
-// 		return err
-// 	}
-// 	defer stmt.Close()
-
-// 	_, err = stmt.Exec(entry.Date, entry.Price, entry.ID)
-// 	if err != nil {
-// 		print(err.Error())
-// 		return err
-// 	}
-
-// 	return nil
-// }
-
-// func deleteEntry(w http.ResponseWriter, r *http.Request) {
-// 	// Чтение и декодирование JSON из запроса
-// 	var entry Entry
-// 	err := json.NewDecoder(r.Body).Decode(&entry)
-// 	if err != nil {
-// 		w.WriteHeader(http.StatusBadRequest)
-// 		print(err.Error())
-// 		return
-// 	}
-
-// 	// Проверка валидности токена
-// 	if !isValidToken(entry.Token) {
-// 		w.WriteHeader(http.StatusUnauthorized)
-// 		return
-// 	}
-	
-// 	switch entry.ID_table {
-// 	case 1: // Удаление данных из базы данных записи по id в таблице 1
-// 		err = deleteEntryFromDB(entry.ID)
-// 		if err != nil {
-// 			print(err.Error())
-// 			w.WriteHeader(http.StatusInternalServerError)
-// 			return
-// 		}
-// 	case 2: // Удаление данных из базы данных записи по id в таблице 1
-// 	err = deleteRecordFromDBtoListPrices(entry.ID)
-// 	if err != nil {
-// 		w.WriteHeader(http.StatusInternalServerError)
-// 		print(err.Error())
-// 		return
-// 		}
-// 	case 3: // Удаление данных из базы данных записи по id в таблице 1
-// 	err = deleteRecordFromDBtoListPayments(entry.ID)
-// 	if err != nil {
-// 		w.WriteHeader(http.StatusInternalServerError)
-// 		print(err.Error())
-// 		return
-// 		}
-// 	}
-// 	w.WriteHeader(http.StatusOK)
-// }
-
-// func deleteEntryFromDB(entryID int) error {
-// 	stmt, err := db.Prepare("DELETE FROM maloesareevo WHERE id = $1")
-// 	if err != nil {
-// 		print(err.Error())
-// 		return err
-// 	}
-// 	defer stmt.Close()
-
-// 	_, err = stmt.Exec(entryID)
-// 	if err != nil {
-// 		print(err.Error())
-// 		return err
-// 	}
-
-// 	return nil
-// }
-
-// func deleteRecordFromDBtoListPrices(entryID int) error {
-// 	stmt, err := db.Prepare("DELETE FROM list_of_price WHERE id = $1")
-// 	if err != nil {
-// 		print(err.Error())
-// 		return err
-// 	}
-// 	defer stmt.Close()
-
-// 	_, err = stmt.Exec(entryID)
-// 	if err != nil {
-// 		print(err.Error())
-// 		return err
-// 	}
-
-// 	return nil
-// }
-
-// func deleteRecordFromDBtoListPayments(entryID int) error {
-// 	stmt, err := db.Prepare("DELETE FROM list_of_payments WHERE id = $1")
-// 	if err != nil {
-// 		print(err.Error())
-// 		return err
-// 	}
-// 	defer stmt.Close()
-
-// 	_, err = stmt.Exec(entryID)
-// 	if err != nil {
-// 		print(err.Error())
-// 		return err
-// 	}
-
-// 	return nil
-// }
-
 func createRecordFromWorkspace(w http.ResponseWriter, r *http.Request) {
-	var record Record
+	var record Workspace
 	err := json.NewDecoder(r.Body).Decode(&record)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -381,7 +103,7 @@ func createRecordFromWorkspace(w http.ResponseWriter, r *http.Request) {
 }
 
 func createRecordFromListPrice(w http.ResponseWriter, r *http.Request) {
-	var record ListPriceRecord
+	var record ListPrices
 	err := json.NewDecoder(r.Body).Decode(&record)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -404,7 +126,7 @@ func createRecordFromListPrice(w http.ResponseWriter, r *http.Request) {
 }
 
 func createRecordFromListPayment(w http.ResponseWriter, r *http.Request) {
-	var record ListPaymentRecord
+	var record ListPayments
 	err := json.NewDecoder(r.Body).Decode(&record)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -427,7 +149,7 @@ func createRecordFromListPayment(w http.ResponseWriter, r *http.Request) {
 }
 
 func updateRecordFromWorkspace(w http.ResponseWriter, r *http.Request) {
-	var record Record
+	var record Workspace
 	err := json.NewDecoder(r.Body).Decode(&record)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -450,7 +172,7 @@ func updateRecordFromWorkspace(w http.ResponseWriter, r *http.Request) {
 }
 
 func updateRecordFromListPrice(w http.ResponseWriter, r *http.Request) {
-	var record ListPriceRecord
+	var record ListPrices
 	err := json.NewDecoder(r.Body).Decode(&record)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -473,7 +195,7 @@ func updateRecordFromListPrice(w http.ResponseWriter, r *http.Request) {
 }
 
 func updateRecordFromListPayments(w http.ResponseWriter, r *http.Request) {
-	var record ListPaymentRecord
+	var record ListPayments
 	err := json.NewDecoder(r.Body).Decode(&record)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -496,7 +218,7 @@ func updateRecordFromListPayments(w http.ResponseWriter, r *http.Request) {
 }
 
 func deleteRecordFromWorkspace(w http.ResponseWriter, r *http.Request) {
-	var record Record
+	var record Workspace
 	err := json.NewDecoder(r.Body).Decode(&record)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -509,7 +231,7 @@ func deleteRecordFromWorkspace(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = deleteRecordFromWorkspace(record.ID)
+	err = deleteRecordInWorkspace(record.ID)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
@@ -519,7 +241,7 @@ func deleteRecordFromWorkspace(w http.ResponseWriter, r *http.Request) {
 }
 
 func deleteRecordFromListPrice(w http.ResponseWriter, r *http.Request) {
-	var record ListPriceRecord
+	var record ListPrices
 	err := json.NewDecoder(r.Body).Decode(&record)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -532,7 +254,7 @@ func deleteRecordFromListPrice(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = deleteRecordFromListPrice(record.ID)
+	err = deleteRecordInListPrice(record.ID)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
@@ -542,7 +264,7 @@ func deleteRecordFromListPrice(w http.ResponseWriter, r *http.Request) {
 }
 
 func deleteRecordFromListPayments(w http.ResponseWriter, r *http.Request) {
-	var record ListPaymentRecord
+	var record ListPayments
 	err := json.NewDecoder(r.Body).Decode(&record)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -555,7 +277,7 @@ func deleteRecordFromListPayments(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = deleteRecordFromListPayment(record.ID)
+	err = deleteRecordInListPayment(record.ID)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
@@ -564,54 +286,52 @@ func deleteRecordFromListPayments(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
+// Функция getAllRecords возвращает все записи из таблицы "maloesareevo" базы данных
 func getAllRecords(w http.ResponseWriter, r *http.Request) {
-	// Получение всех записей из базы данных
+	// Выполнение SQL-запроса для получения всех записей из таблицы "maloesareevo"
 	rows, err := db.Query("SELECT * FROM maloesareevo")
 	if err != nil {
-		print(err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
+		log.Println(err)
 		return
 	}
 	defer rows.Close()
 
-	// Создание среза для хранения всех записей
-	var entries []Entry
+	// Создание среза для хранения записей
+	var records []Workspace
 
-	// Итерация по результатам запроса и добавление записей в срез
+	// Итерация по результатам запроса
 	for rows.Next() {
-		var entry Entry
-		err := rows.Scan(
-			&entry.ID,
-			&entry.ID_table,
-			&entry.Token,
-			&entry.Date,
-			&entry.Price,
-			&entry.TimeWork,
-			&entry.Penalty,
-			&entry.Payments,
-		)
+		var record Workspace
+		err := rows.Scan(&record.ID, &record.Date, &record.Price, &record.TimeWork, &record.Penalty)
 		if err != nil {
-			print(err.Error())
 			w.WriteHeader(http.StatusInternalServerError)
+			log.Println(err)
 			return
 		}
-		entries = append(entries, entry)
+		records = append(records, record)
 	}
 
-	// Проверка наличия ошибок при выполнении запроса
-	if err = rows.Err(); err != nil {
-		print(err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	// Кодирование среза записей в формат JSON и отправка клиенту
-	err = json.NewEncoder(w).Encode(entries)
+	// Проверка ошибок при итерации
+	err = rows.Err()
 	if err != nil {
-		print(err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
+		log.Println(err)
 		return
 	}
+
+	// Преобразование записей в JSON
+	jsonData, err := json.Marshal(records)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		log.Println(err)
+		return
+	}
+
+	// Отправка JSON-ответа клиенту
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(jsonData)
 }
 func getAllRecordsFromListPrice(w http.ResponseWriter, r *http.Request) {
 	// Получение всех записей из таблицы "list_of_price"
@@ -624,11 +344,11 @@ func getAllRecordsFromListPrice(w http.ResponseWriter, r *http.Request) {
 	defer rows.Close()
 
 	// Создание среза для хранения всех записей
-	var entries []Entry
+	var entries []ListPrices
 
 	// Итерация по результатам запроса и добавление записей в срез
 	for rows.Next() {
-		var entry Entry
+		var entry ListPrices
 		err := rows.Scan(
 			&entry.ID,
 			&entry.Date,
@@ -669,15 +389,15 @@ func getAllRecordsFromListPayments(w http.ResponseWriter, r *http.Request) {
 	defer rows.Close()
 
 	// Создание среза для хранения всех записей
-	var entries []Entry
+	var entries []ListPayments
 
 	// Итерация по результатам запроса и добавление записей в срез
 	for rows.Next() {
-		var entry Entry
+		var entry ListPayments
 		err := rows.Scan(
 			&entry.ID,
 			&entry.Date,
-			&entry.Price,
+			&entry.PriceDay,
 		)
 		if err != nil {
 			print(err.Error())
