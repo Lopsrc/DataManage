@@ -194,7 +194,7 @@ def listPaymentsTable(token_):
         date = str(input("Enter date(yyyy-mm-dd): "))
         price = int(input("Enter price of the day(3200): "))
 
-        response = dbWork.updateRecordToListPrices( record_id, date, price, token_)
+        response = dbWork.updateRecordToListPayments( record_id, date, price, token_)
         if response.status_code == 200:
             print('Запись успешно создана')
         else:
