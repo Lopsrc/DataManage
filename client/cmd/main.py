@@ -168,10 +168,17 @@ def listPriceTable(token_):
             print('Запись успешно удалена')
         else:
             print('Ошибка при удалении записи:', response.text)
+    elif action==4:
+        response = dbWork.getAllRecordsToListPrice(token_)
+        if response.status_code == 200:
+            print('Запись успешно удалена')
+        else:
+            print('Ошибка при удалении записи:', response.text)
+            return
+        print(response.json())
 
 
-
-def listPaymentsTable(id_table, token_):
+def listPaymentsTable(token_):
     action = int(input("Select action (1. Create new record, 2. Update record, 3. Delete record, 4. Get all records): "))
     if action==1:
         date = str(input("Enter date(yyyy-mm-dd): "))
@@ -200,7 +207,14 @@ def listPaymentsTable(id_table, token_):
             print('Запись успешно удалена')
         else:
             print('Ошибка при удалении записи:', response.text)
-
+    elif action==4:
+        response = dbWork.getAllRecordsToListPayments(token_)
+        if response.status_code == 200:
+            print('Запись успешно удалена')
+        else:
+            print('Ошибка при удалении записи:', response.text)
+            return
+        print(response.json())
 
 
 if __name__=="__main__":
