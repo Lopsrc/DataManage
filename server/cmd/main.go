@@ -10,30 +10,24 @@ import (
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
 )
+const TOKEN = "J/79d4=Yutb7J!YYgMBvsH12PyxAa197v1CTkWkv4QBy?T4UHDUEiexn0t1HVBNAQ-9429md/8!hmkFZOV!9oeyGbwo0q0mDUYEa7cPloIFu8DjDLj=eKQoOQONPKywwOv?MQtv!rkNWVoNUEv2sTwY3HOxeUUBHeOtXD-voZ12vD3pOZQm6VcspJa7jhuCloAx-unzh?0gXXMVVGsjMZc=eKH2LG!5SOEQ3Xy8BxlccLACoHRB2Df-njeMbJ79a"
 
-// delete print(err.Error())
-const (
-	host     = "localhost"
-	port     = 5432
-	user     = "postgres"
-	password = "12345"
-	dbname   = "postgres"
-)
-
-var db *sql.DB //Вынести конфиги и объект db  в отдельную структуру ConnectionDB
-
+var db *sql.DB 
+type ConfigDB struct{
+	host     string
+	port     int
+	user     string
+	password string
+	dbname   string
+}
 type ListPayments struct {
 	ID       int    `json:"id"`
+	NameWorkspace string `json:"name_workspace"`
 	Date     string `json:"date"`
-	PriceDay int    `json:"payments"`
+	PriceDay int    `json:"price"`
 	Token    string `json:"token"`
 }
-type ListPrices struct {
-	ID    int    `json:"id"`
-	Date  string `json:"date"`
-	Price int    `json:"price"`
-	Token string `json:"token"`
-}
+
 type Workspace struct {
 	ID            int    `json:"id"`
 	NameWorkspace string `json:"name_workspace"`
@@ -48,16 +42,29 @@ type Token struct {
 	Token string `json:"token"`
 }
 
-func main() {
-
-	// Установка соединения с базой данных. Вынести в функцию, которая вернет ConnectionDB и Error
+func createConnectionToDB(con ConfigDB) error{
 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
-		host, port, user, password, dbname)
+		con.host, con.port, con.user, con.password, con.dbname)
 	var err error
 	db, err = sql.Open("postgres", psqlInfo)
 	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func main() {
+	var con ConfigDB = ConfigDB{
+		host: "localhost",
+		port: 5432,
+		user: "postgres",
+		password: "12345",
+		dbname: "postgres",
+	}
+	
+	err := createConnectionToDB(con)
+	if err!=nil{
 		print(err.Error())
-		log.Fatal(err)
 	}
 	defer db.Close()
 
@@ -66,19 +73,15 @@ func main() {
 
 	// Установка обработчиков запросов
 	router.HandleFunc("/workspace", createRecordFromWorkspace).Methods("POST")
-	router.HandleFunc("/price", createRecordFromListPrice).Methods("POST")
 	router.HandleFunc("/payments", createRecordFromListPayment).Methods("POST")
 
 	router.HandleFunc("/workspace", updateRecordFromWorkspace).Methods("PUT")
-	router.HandleFunc("/price", updateRecordFromListPrice).Methods("PUT")
 	router.HandleFunc("/payments", updateRecordFromListPayments).Methods("PUT")
 
 	router.HandleFunc("/workspace", deleteRecordFromWorkspace).Methods("DELETE")
-	router.HandleFunc("/price", deleteRecordFromListPrice).Methods("DELETE")
 	router.HandleFunc("/payments", deleteRecordFromListPayments).Methods("DELETE")
 
 	router.HandleFunc("/workspace", getAllRecords).Methods("GET")                // Новый обработчик для получения всех записей
-	router.HandleFunc("/price", getAllRecordsFromListPrice).Methods("GET")       // Обработчик для получения всех записей из таблицы "list_of_price"
 	router.HandleFunc("/payments", getAllRecordsFromListPayments).Methods("GET") // Обработчик для получения всех записей из таблицы "list_of_payments"
 	// Запуск сервера на порту 8080
 	log.Fatal(http.ListenAndServe(":8080", router))
@@ -92,9 +95,6 @@ func createRecordFromWorkspace(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	print("w date = "+record.Date)
-	print("w name = "+record.NameWorkspace)
-	print("w token = "+record.Token)
 	// Проверка валидности токена
 	if !isValidToken(record.Token) {
 		w.WriteHeader(http.StatusUnauthorized)
@@ -102,31 +102,6 @@ func createRecordFromWorkspace(w http.ResponseWriter, r *http.Request) {
 	}
 
 	err = insertRecordToWorkspace(record)
-	if err != nil {
-		print(err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	w.WriteHeader(http.StatusOK)
-}
-
-func createRecordFromListPrice(w http.ResponseWriter, r *http.Request) {
-	var record ListPrices
-	err := json.NewDecoder(r.Body).Decode(&record)
-	if err != nil {
-		print(err.Error())
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	// Проверка валидности токена
-	if !isValidToken(record.Token) {
-		w.WriteHeader(http.StatusUnauthorized)
-		return
-	}
-
-	err = insertRecordToListPrice(record)
 	if err != nil {
 		print(err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
@@ -186,31 +161,6 @@ func updateRecordFromWorkspace(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-func updateRecordFromListPrice(w http.ResponseWriter, r *http.Request) {
-	var record ListPrices
-	err := json.NewDecoder(r.Body).Decode(&record)
-	if err != nil {
-		print(err.Error())
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	// Проверка валидности токена
-	if !isValidToken(record.Token) {
-		w.WriteHeader(http.StatusUnauthorized)
-		return
-	}
-
-	err = updateRecordInListPrice(record)
-	if err != nil {
-		print(err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	w.WriteHeader(http.StatusOK)
-}
-
 func updateRecordFromListPayments(w http.ResponseWriter, r *http.Request) {
 	var record ListPayments
 	err := json.NewDecoder(r.Body).Decode(&record)
@@ -219,7 +169,6 @@ func updateRecordFromListPayments(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-
 	// Проверка валидности токена
 	if !isValidToken(record.Token) {
 		w.WriteHeader(http.StatusUnauthorized)
@@ -252,31 +201,6 @@ func deleteRecordFromWorkspace(w http.ResponseWriter, r *http.Request) {
 	}
 
 	err = deleteRecordInWorkspace(record.ID)
-	if err != nil {
-		print(err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	w.WriteHeader(http.StatusOK)
-}
-
-func deleteRecordFromListPrice(w http.ResponseWriter, r *http.Request) {
-	var record ListPrices
-	err := json.NewDecoder(r.Body).Decode(&record)
-	if err != nil {
-		print(err.Error())
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	// Проверка валидности токена
-	if !isValidToken(record.Token) {
-		w.WriteHeader(http.StatusUnauthorized)
-		return
-	}
-
-	err = deleteRecordInListPrice(record.ID)
 	if err != nil {
 		print(err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
@@ -374,62 +298,6 @@ func getAllRecords(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	w.Write(jsonData)
 }
-func getAllRecordsFromListPrice(w http.ResponseWriter, r *http.Request) {
-	var token Token
-	err := json.NewDecoder(r.Body).Decode(&token)
-	if err != nil {
-		print(err.Error())
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-	// Проверка валидности токена
-	if !isValidToken(token.Token) {
-		w.WriteHeader(http.StatusUnauthorized)
-		return
-	}
-	// Получение всех записей из таблицы "list_of_price"
-	rows, err := db.Query("SELECT * FROM list_of_price")
-	if err != nil {
-		print(err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	defer rows.Close()
-
-	// Создание среза для хранения всех записей
-	var entries []ListPrices
-
-	// Итерация по результатам запроса и добавление записей в срез
-	for rows.Next() {
-		var entry ListPrices
-		err := rows.Scan(
-			&entry.ID,
-			&entry.Date,
-			&entry.Price,
-		)
-		if err != nil {
-			print(err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-		entries = append(entries, entry)
-	}
-
-	// Проверка наличия ошибок при выполнении запроса
-	if err = rows.Err(); err != nil {
-		print(err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	// Кодирование среза записей в формат JSON и отправка клиенту
-	err = json.NewEncoder(w).Encode(entries)
-	if err != nil {
-		print(err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-}
 
 func getAllRecordsFromListPayments(w http.ResponseWriter, r *http.Request) {
 	var token Token
@@ -460,6 +328,7 @@ func getAllRecordsFromListPayments(w http.ResponseWriter, r *http.Request) {
 		var entry ListPayments
 		err := rows.Scan(
 			&entry.ID,
+			&entry.NameWorkspace,
 			&entry.Date,
 			&entry.PriceDay,
 		)
@@ -487,10 +356,7 @@ func getAllRecordsFromListPayments(w http.ResponseWriter, r *http.Request) {
 	}
 }
 func isValidToken(token string) bool {
-	// Реализуйте проверку валидности токена здесь
-	// Возвращайте true, если токен валиден, и false в противном случае
-	// Это может включать проверку в базе данных или другую логику проверки
-	// В данном примере функция всегда возвращает true
+	if token!=TOKEN {return false}
 	return true
 }
 
@@ -500,9 +366,6 @@ func insertRecordToWorkspace(record Workspace) error {
 		return err
 	}
 	defer stmt.Close()
-	print(" date = "+record.Date)
-	print(" name = "+record.NameWorkspace)
-	print(" token = "+record.Token)
 	// Выполнение SQL-запроса для вставки записи
 	_, err = stmt.Exec(record.NameWorkspace, record.Date, record.Price, record.TimeWork, record.Penalty)
 	if err != nil {
@@ -511,30 +374,15 @@ func insertRecordToWorkspace(record Workspace) error {
 
 	return nil
 }
-func insertRecordToListPrice(record ListPrices) error {
-	stmt, err := db.Prepare("INSERT INTO list_of_price (date_change, price_day) VALUES ($1, $2)")
-	if err != nil {
-		return err
-	}
-	defer stmt.Close()
-
-	// Выполнение SQL-запроса для вставки записи
-	_, err = stmt.Exec(record.ID, record.Date, record.Price)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
 func insertRecordToListPayment(record ListPayments) error {
-	stmt, err := db.Prepare("INSERT INTO list_of_payments (date_change, price_day) VALUES ($1, $2)")
+	stmt, err := db.Prepare("INSERT INTO list_of_payments (name_workspace, payment_date, price) VALUES ($1, $2, $3)")
 	if err != nil {
 		return err
 	}
 	defer stmt.Close()
 
 	// Выполнение SQL-запроса для вставки записи
-	_, err = stmt.Exec(record.ID, record.Date, record.PriceDay)
+	_, err = stmt.Exec(record.NameWorkspace, record.Date, record.PriceDay)
 	if err != nil {
 		return err
 	}
@@ -557,32 +405,19 @@ func updateRecordInWorkspace(record Workspace) error {
 
 	return nil
 }
-func updateRecordInListPrice(record ListPrices) error {
-	// Подготовка SQL-запроса для обновления записи
-	stmt, err := db.Prepare("UPDATE list_of_price SET date_change = $2, price_day = $3 WHERE id = $1")
-	if err != nil {
-		return err
-	}
-	defer stmt.Close()
-
-	// Выполнение SQL-запроса для обновления записи
-	_, err = stmt.Exec(record.ID, record.Date, record.Price)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
 func updateRecordInListPayment(record ListPayments) error {
 	// Подготовка SQL-запроса для обновления записи
-	stmt, err := db.Prepare("UPDATE list_of_payments SET payment_date = $2, price = $3 WHERE id = $1")
+	stmt, err := db.Prepare("UPDATE list_of_payments SET name_workspace = $2, payment_date = $3, price = $4 WHERE id = $1")
 	if err != nil {
 		return err
 	}
 	defer stmt.Close()
-
+	print("hhhhh : "+record.Date)
+	print(record.NameWorkspace)
+	print(record.ID)
+	print(record.PriceDay)
 	// Выполнение SQL-запроса для обновления записи
-	_, err = stmt.Exec(record.ID, record.Date, record.PriceDay)
+	_, err = stmt.Exec(record.ID, record.NameWorkspace, record.Date, record.PriceDay)
 	if err != nil {
 		return err
 	}
@@ -605,24 +440,6 @@ func deleteRecordInWorkspace(recordID int) error {
 
 	return nil
 }
-
-func deleteRecordInListPrice(recordID int) error {
-	// Подготовка SQL-запроса для удаления записи
-	stmt, err := db.Prepare("DELETE FROM list_of_price WHERE id = $1")
-	if err != nil {
-		return err
-	}
-	defer stmt.Close()
-
-	// Выполнение SQL-запроса для удаления записи
-	_, err = stmt.Exec(recordID)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func deleteRecordInListPayment(recordID int) error {
 	// Подготовка SQL-запроса для удаления записи
 	stmt, err := db.Prepare("DELETE FROM list_of_payments WHERE id = $1")

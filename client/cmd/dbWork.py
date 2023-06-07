@@ -40,10 +40,11 @@ def deleteRecordToWorkspace(record_id, token):
     return response
 
 
-def createRecordToListPrices(date, price, token):
-    url = base_url + '/price'
+def createRecordToListPayments(name_workspace,date, price, token):
+    url = base_url + '/payments'
     headers = {'Content-Type': 'application/json'}
     data = {
+        'name_workspace': name_workspace,
         'date': date,
         'price': price,
         'token': token
@@ -51,41 +52,12 @@ def createRecordToListPrices(date, price, token):
     response = requests.post(url, headers=headers, data=json.dumps(data))
     return response
 
-def updateRecordToListPrices(entry_id, date, price, token):
-    url = base_url + '/price'
-    headers = {'Content-Type': 'application/json'}
-    data = {
-        'id': entry_id,
-        'date': date,
-        'price': price,
-        'token': token
-    }
-    response = requests.put(url, headers=headers, data=json.dumps(data))
-    return response
-
-def deleteRecordToListPrices(entry_id, token):
-    url = base_url + '/price'
-    headers = {'Content-Type': 'application/json'}
-    data = {'id': entry_id, 'token': token}
-    response = requests.delete(url, headers=headers, data=json.dumps(data))
-    return response
-
-def createRecordToListPayments(date, price, token):
-    url = base_url + '/payments'
-    headers = {'Content-Type': 'application/json'}
-    data = {
-        'date': date,
-        'price': price,
-        'token': token
-    }
-    response = requests.post(url, headers=headers, data=json.dumps(data))
-    return response
-
-def updateRecordToListPayments(entry_id, date, price, token):
+def updateRecordToListPayments(entry_id, name_workspace, date, price, token):
     url = base_url + '/payments'
     headers = {'Content-Type': 'application/json'}
     data = {
         'id': entry_id,
+        'name_workspace': name_workspace,
         'date': date,
         'price': price,
         'token': token
@@ -107,12 +79,7 @@ def getAllRecordsToWorkspace(token):
     data = { 'token': token}
     response = requests.get(url, headers=headers, data=json.dumps(data))
     return response
-def getAllRecordsToListPrices(token):
-    url = base_url + '/price'
-    headers = {'Content-Type': 'application/json'}
-    data = { 'token': token}
-    response = requests.get(url, headers=headers, data=json.dumps(data))
-    return response
+
 def getAllRecordsToListPayments( token):
     url = base_url + '/payments'
     headers = {'Content-Type': 'application/json'}
