@@ -1,41 +1,18 @@
-
-
 import dbWork
+from tabulate import tabulate 
+import json
 
 fix_price_of_the_day = 3200
 TOKEN = 'J/79d4=Yutb7J!YYgMBvsH12PyxAa197v1CTkWkv4QBy?T4UHDUEiexn0t1HVBNAQ-9429md/8!hmkFZOV!9oeyGbwo0q0mDUYEa7cPloIFu8DjDLj=eKQoOQONPKywwOv?MQtv!rkNWVoNUEv2sTwY3HOxeUUBHeOtXD-voZ12vD3pOZQm6VcspJa7jhuCloAx-unzh?0gXXMVVGsjMZc=eKH2LG!5SOEQ3Xy8BxlccLACoHRB2Df-njeMbJ79a'
-
-class Workspace:
-    def __init__(self, id: int,
-                nameworkspace: str,
-                date: str,
-                price: int,
-                timework: int,
-                penalty: int,) -> None:
-        self.id = id
-        self.nameworkspace = nameworkspace
-        self.date = date
-        self.price = price
-        self.timework = timework
-        self.penalty = penalty
-
-class ListPayments:
-    def __init__(self, id: int,
-                nameworkspace: str,
-                date: str,
-                price: int,) -> None:
-        self.id = id
-        self.nameworkspace = nameworkspace
-        self.date = date
-        self.price = price
 
 def count_price_of_the_day(time_work, penalty):
     if time_work <= 4:
         return int(fix_price_of_the_day/2-penalty)
     return int(fix_price_of_the_day-penalty)
 
-def getRecordId():
-    pass
+def printTable(data):
+    table = tabulate(data, headers="keys", tablefmt="psql")
+    print(table)
 
 
 def workspaceTable(token_):
@@ -81,7 +58,7 @@ def workspaceTable(token_):
         else:
             print('Ошибка при получении записи:', response.text)
             return
-        print(response.json())
+        printTable(response.json())
 
 
 def listPaymentsTable(token_):
@@ -122,7 +99,7 @@ def listPaymentsTable(token_):
         else:
             print('Ошибка при получении записи:', response.text)
             return
-        print(response.json())
+        printTable(response.json())
 
 
 if __name__=="__main__":

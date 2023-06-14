@@ -39,7 +39,6 @@ def deleteRecordToWorkspace(record_id, token):
     response = requests.delete(url, headers=headers, data=json.dumps(data))
     return response
 
-
 def createRecordToListPayments(name_workspace,date, price, token):
     url = base_url + '/payments'
     headers = {'Content-Type': 'application/json'}
@@ -71,7 +70,6 @@ def deleteRecordToListPayments(entry_id, token):
     data = {'id': entry_id, 'token': token}
     response = requests.delete(url, headers=headers, data=json.dumps(data))
     return response
-
 
 def getAllRecordsToWorkspace(token):
     url = base_url + '/workspace'
