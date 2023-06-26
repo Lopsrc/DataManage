@@ -1,14 +1,13 @@
 import dbWork
 from tabulate import tabulate 
 
-TOKEN = 'vYq?VQ?Gvg==9cow9neCUCwc3YpoA5kmOBrdQL!/9k60iNjr3i6?RS?fKr3UDEkbNUKKdt16xhio3yJxj8-1Ql84BUmDZ4fQq5CpeyNaF?!5qiJvjfd5a?OEP0KMYo2vt/yTxpv14hfpDs768?8Et5cZzxJgd2TlkBtKzvj0pXsRzW-95iwWREFwp7wCqzOD1XRg553okTUJKpAQr7wulPLln?fMIrBid9b5x!9oCENq6Z=FtaaiNECuc5?Q6cRi'
+TOKEN = 'J/79d4=Yutb7J!YYgMBvsH12PyxAa197v1CTkWkv4QBy?T4UHDUEiexn0t1HVBNAQ-9429md/8!hmkFZOV!9oeyGbwo0q0mDUYEa7cPloIFu8DjDLj=eKQoOQONPKywwOv?MQtv!rkNWVoNUEv2sTwY3HOxeUUBHeOtXD-voZ12vD3pOZQm6VcspJa7jhuCloAx-unzh?0gXXMVVGsjMZc=eKH2LG!5SOEQ3Xy8BxlccLACoHRB2Df-njeMbJ79a'
 
 def count_price_of_the_day(penalty, price):
     return int(price-penalty)
 
 def printTable(data):
-    table = tabulate(data, headers="keys", tablefmt="psql")
-    print(table)
+    print(tabulate(data, headers="keys", tablefmt="psql"))
 
 def createRecordFromWorkspace(token):
     nameworkspace = str(input("Enter the name of the workplace: "))
@@ -51,9 +50,20 @@ def getAllRecordsFromWorkspace(token):
     if response.status_code == 200:
         print('Запись успешно получена')
     else:
-        print('Ошибка при получении записи:', response.text)
+        print('Ошибка при получении записи:', response.status_code)
         return
     printTable(response.json())
+    return response
+def getAllRecordsOfWorkspaceFromWorkspace(token):
+    workspace = str(input("Enter the workspace: "))
+    response = getAllRecordsFromWorkspace(token)
+    data = response.json()
+    dataSort = []
+    for item in data:
+        for key, value in item.items():
+            if value == workspace and key == 'name_workspace':
+                dataSort.append(item)
+    printTable(dataSort)
 
 def createRecordFromListPayments(token):
     date          = str(input("Enter date(yyyy-mm-dd): "))
@@ -92,9 +102,22 @@ def getAllRecordsFromListPayments(token):
         print('Ошибка при получении записи:', response.text)
         return
     printTable(response.json())
-    
+    return response
+def getAllRecordsOfWorkspaceFromListPayments(token):
+    workspace = str(input("Enter the workspace: "))
+    response = getAllRecordsFromListPayments(token)
+    data = response.json()
+    dataSort = []
+    for item in data:
+        for key, value in item.items():
+            if value == workspace and key == 'name_workspace':
+                dataSort.append(item)
+    printTable(dataSort)
+
+
+
 def workspaceTable(token_):
-    action = int(input("Select action (1. Create new record, 2. Update record, 3. Delete record, 4. Get all records): "))
+    action = int(input("Select action (1. Create new record, 2. Update record, 3. Delete record, 4. Get all records, 5. Get all records by workspace): "))
     if action==1:
         createRecordFromWorkspace(token_)
     elif action==2:
@@ -103,9 +126,11 @@ def workspaceTable(token_):
         deleteRecordFromWorkspace(token_)
     elif action==4:
         getAllRecordsFromWorkspace(token_)
+    elif action==5:
+        getAllRecordsOfWorkspaceFromWorkspace(token_)
 
 def listPaymentsTable(token_):
-    action = int(input("Select action (1. Create new record, 2. Update record, 3. Delete record, 4. Get all records): "))
+    action = int(input("Select action (1. Create new record, 2. Update record, 3. Delete record, 4. Get all records,  5. Get all records by workspace): "))
     if action==1:
         createRecordFromListPayments(token_)
     elif action==2:
@@ -114,12 +139,13 @@ def listPaymentsTable(token_):
         deleteRecordFromListPayments(token_)
     elif action==4:
         getAllRecordsFromListPayments(token_)
+    elif action==5:
+        getAllRecordsOfWorkspaceFromListPayments(token_)
 
 
 if __name__=="__main__":
     token = str(input("Enter token: "))
     if TOKEN!=token:
-        print("Иди на хуй")
         exit()
     while(True):
         id_table = int(input("Enter the table number: "))
