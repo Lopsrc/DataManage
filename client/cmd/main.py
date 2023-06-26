@@ -59,11 +59,20 @@ def getAllRecordsOfWorkspaceFromWorkspace(token):
     response = getAllRecordsFromWorkspace(token)
     data = response.json()
     dataSort = []
+    total_price = 0
+    time_work_total=0
+    days = 0
     for item in data:
         for key, value in item.items():
             if value == workspace and key == 'name_workspace':
+                days += 1
+                total_price += int(item['price'])
+                time_work_total += int(item['time_work'])
                 dataSort.append(item)
     printTable(dataSort)
+    print("Price total: "+str(total_price))
+    print("Time work total: "+str(time_work_total))
+    print("Days: "+str(days))
 
 def createRecordFromListPayments(token):
     date          = str(input("Enter date(yyyy-mm-dd): "))
@@ -108,11 +117,14 @@ def getAllRecordsOfWorkspaceFromListPayments(token):
     response = getAllRecordsFromListPayments(token)
     data = response.json()
     dataSort = []
+    total_price = 0
     for item in data:
         for key, value in item.items():
             if value == workspace and key == 'name_workspace':
+                total_price += int(item['price'])
                 dataSort.append(item)
     printTable(dataSort)
+    print("Price total: "+str(total_price))
 
 
 
