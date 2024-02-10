@@ -1,7 +1,7 @@
 import dbWork
 from tabulate import tabulate 
 
-TOKEN = 'J/79d4=Yutb7J!YYgMBvsH12PyxAa197v1CTkWkv4QBy?T4UHDUEiexn0t1HVBNAQ-9429md/8!hmkFZOV!9oeyGbwo0q0mDUYEa7cPloIFu8DjDLj=eKQoOQONPKywwOv?MQtv!rkNWVoNUEv2sTwY3HOxeUUBHeOtXD-voZ12vD3pOZQm6VcspJa7jhuCloAx-unzh?0gXXMVVGsjMZc=eKH2LG!5SOEQ3Xy8BxlccLACoHRB2Df-njeMbJ79a'
+TOKEN = ''
 
 def count_price_of_the_day(penalty, price):
     return int(price-penalty)
