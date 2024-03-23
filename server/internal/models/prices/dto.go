@@ -1,4 +1,4 @@
-package listprices
+package pricesmodel
 
 type CreateListPrices struct{
 	Date     string `json:"Date"`

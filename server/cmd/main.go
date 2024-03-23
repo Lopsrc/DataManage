@@ -1,72 +1,28 @@
 package main
 
 import (
-	"database/sql"
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
 )
-const TOKEN = ""
 
-var db *sql.DB 
-type ConfigDB struct{
-	host     string
-	port     int
-	user     string
-	password string
-	dbname   string
-}
-type ListPayments struct {
-	ID       int    `json:"id"`
-	NameWorkspace string `json:"name_workspace"`
-	Date     string `json:"date"`
-	PriceDay int    `json:"price"`
-	Token    string `json:"token"`
-}
 
-type Workspace struct {
-	ID            int    `json:"id"`
-	NameWorkspace string `json:"name_workspace"`
-	Date          string `json:"date"`
-	Price         int    `json:"price"`
-	TimeWork      int    `json:"time_work"`
-	Penalty       int    `json:"penalty"`
-	Token         string `json:"token"`
-}
 
-type Token struct {
-	Token string `json:"token"`
-}
-
-func createConnectionToDB(con ConfigDB) error{
-	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
-		con.host, con.port, con.user, con.password, con.dbname)
-	var err error
-	db, err = sql.Open("postgres", psqlInfo)
-	if err != nil {
-		return err
-	}
-	return nil
-}
+// type Workspace struct {
+// 	ID            int    `json:"id"`
+// 	NameWorkspace string `json:"name_workspace"`
+// 	Date          string `json:"date"`
+// 	Price         int    `json:"price"`
+// 	TimeWork      int    `json:"time_work"`
+// 	Penalty       int    `json:"penalty"`
+// 	Token         string `json:"token"`
+// }
 
 func main() {
-	var con ConfigDB = ConfigDB{
-		host: "localhost",
-		port: 5432,
-		user: "postgres",
-		password: "12345",
-		dbname: "postgres",
-	}
 	
-	err := createConnectionToDB(con)
-	if err!=nil{
-		print(err.Error())
-	}
-	defer db.Close()
 
 	// Инициализация маршрутизатора
 	router := mux.NewRouter()
