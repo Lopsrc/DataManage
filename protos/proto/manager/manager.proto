@@ -1,0 +1,48 @@
+syntax = "proto3";
+
+package auth;
+
+option go_package = "Lopsrc.sso.v1;ssov1";
+
+service Manager {
+    rpc Create (CreateRequest) returns (CreateResponse);
+    rpc Update (UpdateRequest) returns (UpdateResponse);
+    rpc Get (GetRequest) returns (GetResponse);
+    rpc Delete (DeleteRequest) returns (DeleteResponse);
+}
+
+message CreateRequest {
+  string email = 1; // Email of the user to register.
+  string password = 2; // Password of the user to register.
+}
+
+message CreateResponse {
+  string token = 1; // Auth token of the logged in user.
+}
+
+message UpdateRequest {
+    string email = 1; // Email of the user to update.
+    string password = 2; // Password of the user to update.
+}
+
+message UpdateResponse {
+    string token = 1; // Auth token of the logged in user.
+}
+
+message GetRequest {
+    string email = 1; // Email of the user to get.
+}
+
+message GetResponse {
+    string email = 1; // Email of the user.
+    string password = 2; // Password of the user.
+}
+
+message DeleteRequest {
+    string email = 1; // Email of the user to delete.
+}
+
+message DeleteResponse {
+    string email = 1; // Email of the user.
+    string password = 2; // Password of the user.
+}
