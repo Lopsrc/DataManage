@@ -1,48 +1,105 @@
 syntax = "proto3";
 
-package auth;
+package manager;
 
-option go_package = "Lopsrc.sso.v1;ssov1";
+option go_package = "Lopsrc.manger.v1;manager1";
 
-service Manager {
-    rpc Create (CreateRequest) returns (CreateResponse);
-    rpc Update (UpdateRequest) returns (UpdateResponse);
-    rpc Get (GetRequest) returns (GetResponse);
-    rpc Delete (DeleteRequest) returns (DeleteResponse);
+service ManagerWork {
+    rpc Create (CreateWorkRequest) returns (CreateWorkResponse);
+    rpc Update (UpdateWorkRequest) returns (UpdateWorkResponse);
+    rpc GetAll (GetWorkRequest) returns (GetAllWorkResponse);
+    rpc GetAllByDate (GetByDateWorkRequest) returns (GetAllWorkResponse);
+    rpc Delete (DeleteWorkRequest) returns (DeleteWorkResponse);
+}
+service ManagerPrice {
+    rpc Create (CreatePriceRequest) returns (CreatePriceResponse);
+    rpc Update (UpdatePriceRequest) returns (UpdatePriceResponse);
+    rpc Get (GetPriceRequest) returns (GetPriceResponse);
 }
 
-message CreateRequest {
-  string email = 1; // Email of the user to register.
-  string password = 2; // Password of the user to register.
+message CreateWorkRequest {
+    string name    = 1;
+    string date    = 2;
+    int64  price   = 3;
+    int32  time    = 4;
+    int64  penalty = 5;
+    int64  user_id = 6;
 }
 
-message CreateResponse {
-  string token = 1; // Auth token of the logged in user.
+message CreateWorkResponse {
+    bool is_create = 1;
 }
 
-message UpdateRequest {
-    string email = 1; // Email of the user to update.
-    string password = 2; // Password of the user to update.
+message UpdateWorkRequest {
+    int64  id      = 1;
+    string name    = 2;
+    string date    = 3;
+    int64  price   = 4;
+    int32  time    = 5;
+    int64  penalty = 6;
 }
 
-message UpdateResponse {
-    string token = 1; // Auth token of the logged in user.
+message UpdateWorkResponse {
+    bool is_update = 1;
 }
 
-message GetRequest {
-    string email = 1; // Email of the user to get.
+message GetWorkRequest {
+    string name    = 1;
+    int64  user_id = 2;
 }
 
-message GetResponse {
-    string email = 1; // Email of the user.
-    string password = 2; // Password of the user.
+message GetByDateWorkRequest {
+    string name    = 1;
+    string date    = 2;
+    int64  user_id = 3;
 }
 
-message DeleteRequest {
-    string email = 1; // Email of the user to delete.
+message GetWorkResponse {
+    int64 id       = 1;
+    string name    = 2;
+    string date    = 3;
+    int64  price   = 4;
+    int32  time    = 5;
+    int64  penalty = 6;
+    int64  user_id = 7;
 }
 
-message DeleteResponse {
-    string email = 1; // Email of the user.
-    string password = 2; // Password of the user.
+
+message GetAllWorkResponse {
+    repeated GetWorkResponse list_works = 1;
+}
+
+message DeleteWorkRequest {
+    int64  id = 1;
+}
+
+message DeleteWorkResponse {
+    bool is_del  = 1;
+}
+
+// Messages for the Price.
+message CreatePriceRequest {
+    int64 user_id = 1;
+    int64 price = 2;
+}
+
+message CreatePriceResponse {
+    bool is_create = 1;
+}
+
+message UpdatePriceRequest {
+    int64 user_id = 1;
+    int64 price = 2;
+}
+
+message UpdatePriceResponse {
+    bool is_update = 1;
+}
+
+message GetPriceRequest {
+    int64 user_id = 1;
+}
+
+message GetPriceResponse {
+    int64 price = 1;
 }
