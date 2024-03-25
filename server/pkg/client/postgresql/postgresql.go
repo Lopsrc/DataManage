@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"server/internal/config"
-	"server/pkg/utils"
+	"server/server/internal/config"
+	"server/server/pkg/utils"
 	"time"
 
 	"github.com/jackc/pgconn"

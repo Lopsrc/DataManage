@@ -1,5 +1,54 @@
-package main
+package postgresqlwork
 
+import (
+	"context"
+
+	models "server/server/internal/models/work"
+
+	"github.com/jackc/pgx/v4/pgxpool"
+)
+
+
+type Repository struct{
+	pool *pgxpool.Pool
+}
+
+func New(pool *pgxpool.Pool) *Repository {
+	return &Repository{
+		pool: pool,
+	}
+}
+
+func (rep *Repository) Create(
+	ctx context.Context,
+	rec models.CreateWork,
+)(bool, error){
+	return true, nil
+}
+func (rep *Repository) Update(
+	ctx context.Context,
+	rec models.UpdateWork,
+)(bool, error){
+	return true, nil
+}
+func (rep *Repository) GetAll(
+	ctx context.Context,
+	rec []*models.Work,
+)error{
+	return nil
+}
+func (rep *Repository) GetAllByEmail(
+	ctx context.Context,
+	rec []*models.Work,
+)error{
+	return nil
+}
+func (rep *Repository) Delete(
+	ctx context.Context,
+	id int64,
+)(bool, error){
+	return true, nil
+}
 // func insertRecordToWorkspace(record Workspace) error{
 // 	stmt, err := db.Prepare("INSERT INTO workspace (name_workspace, work_date, price, time_work, penalty) VALUES ($1, $2, $3, $4, $5)")
 // 	if err != nil {
