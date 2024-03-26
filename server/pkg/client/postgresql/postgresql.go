@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 	"server/server/internal/config"
-	"server/server/pkg/utils"
+	repeatable "server/server/pkg/utils"
 	"time"
 
 	"github.com/jackc/pgconn"
@@ -21,8 +21,8 @@ type Client interface {
 	BeginTx(ctx context.Context, opts pgx.TxOptions) (pgx.Tx, error)
 }
 
-func NewClient(ctx context.Context, maxAttempts int, sc config.StorageConfig) (pool *pgxpool.Pool, err error) {
-	dsn := fmt.Sprintf("postgresql://%s:%s@%s:%s/%s", sc.Username, sc.Password, sc.Host, sc.Port, sc.Database)
+func NewClient(ctx context.Context, maxAttempts int, cfg config.StorageConfig) (pool *pgxpool.Pool, err error) {
+	dsn := fmt.Sprintf("postgresql://%s:%s@%s:%s/%s", cfg.Username, cfg.Password, cfg.Host, cfg.Port, cfg.Database)
 	err = repeatable.DoWithTries(func() error {
 		ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 		defer cancel()

@@ -2,20 +2,23 @@ package postgresqlwork
 
 import (
 	"context"
+	"errors"
+	"fmt"
 
 	models "server/server/internal/models/work"
 
+	"github.com/jackc/pgconn"
 	"github.com/jackc/pgx/v4/pgxpool"
 )
 
 
 type Repository struct{
-	pool *pgxpool.Pool
+	client *pgxpool.Pool
 }
 
-func New(pool *pgxpool.Pool) *Repository {
+func New(client *pgxpool.Pool) *Repository {
 	return &Repository{
-		pool: pool,
+		client: client,
 	}
 }
 
@@ -23,12 +26,49 @@ func (rep *Repository) Create(
 	ctx context.Context,
 	rec models.CreateWork,
 )(bool, error){
+	query := "SELECT price FROM price WHERE user_id = $1"
+
+	if err := rep.client.QueryRow(ctx, query, rec.UserID).Scan(&rec.Price); err!= nil {
+		var pgErr *pgconn.PgError
+        if errors.As(err, &pgErr) {
+            pgErr = err.(*pgconn.PgError)
+            newErr := fmt.Errorf(fmt.Sprintf("SQL Error: %s, Detail: %s, Where: %s, Code: %s, SQLState: %s", pgErr.Message, pgErr.Detail, pgErr.Where, pgErr.Code, pgErr.SQLState()))
+            return false, newErr
+        }
+		return false, err
+	}
+	query = "INSERT INTO work(name, date, price, time, penalty, user_id) VALUES(?,?,?,?,?,?)"
+
+	_, err := rep.client.Exec(ctx, query, rec.Name, rec.Date, rec.Price, rec.Time, rec.Penalty, rec.UserID)
+	if err != nil {
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) {
+			pgErr = err.(*pgconn.PgError)
+			newErr := fmt.Errorf(fmt.Sprintf("SQL Error: %s, Detail: %s, Where: %s, Code: %s, SQLState: %s", pgErr.Message, pgErr.Detail, pgErr.Where, pgErr.Code, pgErr.SQLState()))
+			return false, newErr
+		}
+		return false, err
+	}
+
 	return true, nil
 }
 func (rep *Repository) Update(
 	ctx context.Context,
 	rec models.UpdateWork,
 )(bool, error){
+
+	query := "UPDATE work SET name = $1, date = $2, price = $3, time = $4, penalty = $5 WHERE id = $6 AND user_id = $7"
+
+	_, err := rep.client.Exec(ctx, query, rec.Name, rec.Date, rec.Price, rec.Time, rec.Penalty, rec.ID, rec.UserID)
+	if err!= nil {
+		var pgErr *pgconn.PgError
+        if errors.As(err, &pgErr) {
+            pgErr = err.(*pgconn.PgError)
+            newErr := fmt.Errorf(fmt.Sprintf("SQL Error: %s, Detail: %s, Where: %s, Code: %s, SQLState: %s", pgErr.Message, pgErr.Detail, pgErr.Where, pgErr.Code, pgErr.SQLState()))
+            return false, newErr
+        }
+        return false, err
+    }
 	return true, nil
 }
 func (rep *Repository) GetAll(

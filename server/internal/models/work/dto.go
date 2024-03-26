@@ -16,6 +16,7 @@ type UpdateWork struct {
 	Price 		int64   `json:"price"`
 	Time 		int32 	`json:"time"`
 	Penalty 	int64 	`json:"penalty"`
+	UserID      int64   `json:"user_id"`
 }
 
 type DeleteWork struct {
