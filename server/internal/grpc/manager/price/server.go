@@ -12,14 +12,14 @@ import (
 )
 
 type PriceService interface{
-	Create(
+	Create( 
 		ctx context.Context,
         rec models.CreatePrice,
-	)(bool, error)
+	)error
 	Update(
 		ctx context.Context,
         rec models.UpdatePrice,
-	)(bool, error)
+	)error
 	Get(
 		ctx context.Context,
         rec models.GetPrice,
@@ -42,7 +42,7 @@ func (s *serverAPI) Create(ctx context.Context, req *manager1.CreatePriceRequest
         return nil, status.Error(codes.InvalidArgument, strErr)
     }
 	// Create a record.
-	isCreate, err := s.p.Create(ctx, models.CreatePrice{
+	err = s.p.Create(ctx, models.CreatePrice{
 		ID: req.UserId,
         Price: req.Price,
     })
@@ -50,7 +50,7 @@ func (s *serverAPI) Create(ctx context.Context, req *manager1.CreatePriceRequest
         return nil, status.Error(codes.Internal, "internal error")
     }
 	return &manager1.CreatePriceResponse{
-		IsCreate: isCreate,
+		IsCreate: true,
 	}, nil
 }
 
@@ -61,7 +61,7 @@ func (s *serverAPI) Update(ctx context.Context, req *manager1.UpdatePriceRequest
         return nil, status.Error(codes.InvalidArgument, strErr)
     }
 	// Update a record.
-	isUpdate, err := s.p.Update(ctx, models.UpdatePrice{
+	err = s.p.Update(ctx, models.UpdatePrice{
 		ID: req.UserId,
         Price: req.Price,
     })
@@ -69,7 +69,7 @@ func (s *serverAPI) Update(ctx context.Context, req *manager1.UpdatePriceRequest
         return nil, status.Error(codes.Internal, "internal error")
     }
 	return &manager1.UpdatePriceResponse{
-		IsUpdate: isUpdate,
+		IsUpdate: true,
 	}, nil
 }
 

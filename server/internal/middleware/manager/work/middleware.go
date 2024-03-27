@@ -8,7 +8,6 @@ const (
 	invalidID 		= "id is invalid"
 	invalidName 	= "name is invalid"
 	invalidDate 	= "date is invalid"
-	invalidPrice 	= "price is invalid"
 	invalidTime 	= "time is invalid"
 	invalidPenalty 	= "penalty is invalid"
 )
@@ -17,9 +16,6 @@ func HandleCreate(req *manager1.CreateWorkRequest)(string, error) {
 
 	if req.GetUserId() == emptyVar {
 		return invalidUserID, nil
-	}
-	if req.GetPrice() == emptyVar {
-		return invalidPrice, nil
 	}
 	if req.GetTime() == emptyVar {
 		return invalidTime, nil
@@ -40,9 +36,6 @@ func HandleUpdate(req *manager1.UpdateWorkRequest)(string, error) {
 
 	if req.GetId() == emptyVar {
 		return invalidID, nil
-	}
-	if req.GetPrice() == emptyVar {
-		return invalidPrice, nil
 	}
 	if req.GetTime() == emptyVar {
 		return invalidTime, nil

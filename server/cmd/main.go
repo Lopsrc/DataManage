@@ -24,7 +24,7 @@ func main() {
 
 	log := setupLogger(cfg.Env)
 
-	postgreSQLClient, err := postgresql.NewClient(context.Background(), 15, cfg.Storage)
+	postgreSQLClient, err := postgresql.NewClient(context.Background(), 3, cfg.Storage)
 	if err!= nil {
         panic(err)
     }

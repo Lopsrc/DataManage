@@ -1,35 +1,40 @@
-package payments
+package workservice
 
 import (
 	"context"
+	"errors"
 	"log/slog"
+	"strings"
 
 	models "server/server/internal/models/work"
+	"server/server/internal/storage"
 )
-
 
 type RepositoryWork interface {
 	Create(
 		ctx context.Context,
-        rec models.CreateWork,
-	)(bool, error)
+		rec *models.CreateWork,
+	) error
 	Update(
 		ctx context.Context,
-        rec models.UpdateWork,
-	)(bool, error)
+		rec *models.UpdateWork,
+	) error
 	GetAll(
 		ctx context.Context,
-        rec []*models.Work,
-	)error
-	GetAllByEmail(
-		ctx context.Context,
-        rec []*models.Work,
-	)error
+		rec *models.GetAllWork,
+	) (works []models.Work, err error)
 	Delete(
 		ctx context.Context,
-        id int64,
-	)(bool, error)
-} 
+		rec *models.DeleteWork,
+	) error
+}
+
+var (
+	ErrInternal           = errors.New("internal error")
+	ErrNotFound           = errors.New("entity is not found")
+	ErrAlreadyExists      = errors.New("entity already exists")
+	ErrInvalidCredentials = errors.New("invalid credentials")
+)
 
 type Works struct {
 	log *slog.Logger
@@ -38,38 +43,103 @@ type Works struct {
 
 func New(rep RepositoryWork, log *slog.Logger) *Works {
 	return &Works{
-        log: log,
-        rep: rep,
-    }
+		log: log,
+		rep: rep,
+	}
 }
 
 func (w *Works) Create(
 	ctx context.Context,
 	rec models.CreateWork,
-)(bool, error){
-	return true, nil
+) error {
+	op := "Work. Create"
+	w.log.Info(op)
+
+	if err := w.rep.Create(ctx, &rec); err != nil {
+		if errors.Is(err, storage.ErrAlreadyExists) {
+			w.log.Error(err.Error())
+			return ErrAlreadyExists
+		}
+		w.log.Error(err.Error())
+		return err
+	}
+
+	return nil
 }
 func (w *Works) Update(
 	ctx context.Context,
 	rec models.UpdateWork,
-)(bool, error){
-	return true, nil
+) error {
+	op := "Work. Update"
+	w.log.Info(op)
+
+	if err := w.rep.Update(ctx, &rec); err != nil {
+		if errors.Is(err, storage.ErrNotFound) {
+			return ErrNotFound
+		}
+		return err
+	}
+
+	return nil
 }
 func (w *Works) Get(
 	ctx context.Context,
 	rec models.GetAllWork,
-)([]models.Work, error){
-	return []models.Work{}, nil
+) ([]models.Work, error) {
+	op := "Work. Get"
+	w.log.Info(op)
+
+	works, err := w.rep.GetAll(ctx, &rec)
+	if err != nil {
+		if errors.Is(err, storage.ErrNotFound) {
+			return []models.Work{}, ErrNotFound
+		}
+		return []models.Work{}, err
+	}
+	return works, nil
 }
 func (w *Works) GetByDate(
 	ctx context.Context,
 	rec models.GetAllWorkByDate,
-)([]models.Work, error){
-	return []models.Work{}, nil
+) ([]models.Work, error) {
+	op := "Work. GetByDate"
+	w.log.Info(op)
+
+	works, err := w.rep.GetAll(ctx, &models.GetAllWork{
+		UserID: rec.UserID,
+        Name:   rec.Name,
+	})
+	if err != nil {
+		if errors.Is(err, storage.ErrNotFound) {
+			return []models.Work{}, ErrNotFound
+		}
+		w.log.Error(err.Error())
+		return []models.Work{}, err
+	}
+	return SortByMonth(&works, rec.Date), nil
 }
 func (w *Works) Delete(
 	ctx context.Context,
 	rec models.DeleteWork,
-)(bool, error){
-	return true, nil
+) error {
+	op := "Work. Delete"
+	w.log.Info(op)
+
+	if err := w.rep.Delete(ctx, &rec); err != nil {
+		if errors.Is(err, storage.ErrNotFound) {
+			return ErrNotFound
+		}
+		return err
+	}
+
+	return nil
+}
+
+func SortByMonth(w *[]models.Work, month string) (works []models.Work) {
+    for _, i := range *w{
+		if  strings.EqualFold(i.Date.Time.Month().String(), month){
+			works = append(works, i)
+		}
+	}
+    return
 }

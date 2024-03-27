@@ -1,11 +1,10 @@
 env: "local"
-is_debug: true
 listen:
   type: port
-  port: 1234
+  port: 44044
 storage:
   host: localhost
   port: 5432
-  database: postgres
+  database: datamanage
   username: postgres
   password: postgres

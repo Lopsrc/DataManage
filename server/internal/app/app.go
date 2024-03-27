@@ -18,8 +18,8 @@ type App struct{
 
 func New(log *slog.Logger, grpcPort string, pconn *pgxpool.Pool) *App{
 
-	storageWork := sqlwork.New(pconn)
-    storagePrice := sqlprice.New(pconn)
+	storageWork := sqlwork.New(pconn, log)
+    storagePrice := sqlprice.New(pconn, log)
 
 	priceService := price.New(storagePrice, log)
 	workService := work.New(storageWork, log)
