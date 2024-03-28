@@ -1,6 +1,9 @@
 package pricemiddleware
 
-import manager1 "server/protos/gen/go/manager"
+import (
+	"fmt"
+	manager1 "server/protos/gen/go/manager"
+)
 
 const (
 	emptyVar 		= 0
@@ -8,29 +11,35 @@ const (
 	invalidPrice	= "price is invalid"
 )
 
-func HandleCreate(req *manager1.CreatePriceRequest) (string, error) {
+func HandleCreate(req *manager1.CreatePriceRequest) error {
 	if req.GetUserId() == emptyVar{
-		return invalidUserID, nil
+		return fmt.Errorf(invalidUserID)
 	}
 	if req.GetPrice() == emptyVar{
-        return invalidPrice, nil
+        return fmt.Errorf(invalidPrice)
     }
-	return "", nil
+	if req.GetPrice() < 0{
+        return fmt.Errorf(invalidPrice)
+    }
+	return nil
 }
 
-func HandleUpdate(req *manager1.UpdatePriceRequest) (string, error) {
+func HandleUpdate(req *manager1.UpdatePriceRequest) error {
 	if req.GetUserId() == emptyVar{
-		return invalidUserID, nil
+		return fmt.Errorf(invalidUserID)
 	}
 	if req.GetPrice() == emptyVar{
-        return invalidPrice, nil
+        return fmt.Errorf(invalidPrice)
     }
-    return "", nil
+	if req.GetPrice() < 0{
+        return fmt.Errorf(invalidPrice)
+    }
+    return nil
 }
 
-func HandleGet(req *manager1.GetPriceRequest) (string, error) {
+func HandleGet(req *manager1.GetPriceRequest) error {
 	if req.GetUserId() == emptyVar{
-		return invalidUserID, nil
+		return fmt.Errorf(invalidUserID)
 	}
-    return "", nil
+    return nil
 }

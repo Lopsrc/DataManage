@@ -7,10 +7,12 @@ import (
 	"log/slog"
 
 	models "server/server/internal/models/work"
+	"server/server/internal/storage"
 
 	"github.com/jackc/pgconn"
 	"github.com/jackc/pgx/v4/pgxpool"
 )
+
 
 
 type Repository struct{
@@ -36,10 +38,10 @@ func (rep *Repository) Create(
         if errors.As(err, &pgErr) {
             pgErr = err.(*pgconn.PgError)
             newErr := fmt.Errorf(fmt.Sprintf("Get. SQL Error: %s, Detail: %s, Where: %s, Code: %s, SQLState: %s" ,pgErr.Message, pgErr.Detail, pgErr.Where, pgErr.Code, pgErr.SQLState()))
-            rep.log.Error(newErr.Error())
 			return newErr
-        }
-		rep.log.Error(err.Error())
+        }else if err.Error() == storage.CodeNotFound{
+			return storage.ErrNotFound
+		}
 		return err
 	}
 	query = "INSERT INTO work(name, date, price, time, penalty, user_id) VALUES($1, $2, $3, $4, $5, $6)"
@@ -49,12 +51,12 @@ func (rep *Repository) Create(
 		var pgErr *pgconn.PgError
 		if errors.As(err, &pgErr) {
 			pgErr = err.(*pgconn.PgError)
+			if pgErr.Code == storage.CodeAlreadyExists{
+				return storage.ErrAlreadyExists
+			}
 			newErr := fmt.Errorf(fmt.Sprintf("Create. SQL Error: %s, Detail: %s, Where: %s, Code: %s, SQLState: %s", pgErr.Message, pgErr.Detail, pgErr.Where, pgErr.Code, pgErr.SQLState()))
-			rep.log.Error(newErr.Error())
-
 			return newErr
 		}
-		rep.log.Error(err.Error())
 		return err
 	}
 
@@ -65,20 +67,20 @@ func (rep *Repository) Update(
 	rec *models.UpdateWork,
 )error{
 
-	query := "UPDATE work SET name = $1, date = $2, price = $3, time = $4, penalty = $5 WHERE id = $6 AND user_id = $7"
+	query := "UPDATE work SET name = $1, date = $2, price = $3, time = $4, penalty = $5 WHERE id = $6"
 
-	_, err := rep.client.Exec(ctx, query, rec.Name, rec.Date.Time, rec.Price, rec.Time, rec.Penalty, rec.ID, rec.UserID)
+	c, err := rep.client.Exec(ctx, query, rec.Name, rec.Date.Time, rec.Price, rec.Time, rec.Penalty, rec.ID)
 	if err!= nil {
 		var pgErr *pgconn.PgError
         if errors.As(err, &pgErr) {
             pgErr = err.(*pgconn.PgError)
             newErr := fmt.Errorf(fmt.Sprintf("SQL Error: %s, Detail: %s, Where: %s, Code: %s, SQLState: %s", pgErr.Message, pgErr.Detail, pgErr.Where, pgErr.Code, pgErr.SQLState()))
-			rep.log.Error(newErr.Error())
-
 			return newErr
-        }
+        }		
         return err
-    }
+    }else if c.RowsAffected() == 0 {
+		return storage.ErrNotFound
+	}
 	return nil
 }
 func (rep *Repository) GetAll(
@@ -94,18 +96,17 @@ func (rep *Repository) GetAll(
         if errors.As(err, &pgErr) {
             pgErr = err.(*pgconn.PgError)
             newErr := fmt.Errorf(fmt.Sprintf("SQL Error: %s, Detail: %s, Where: %s, Code: %s, SQLState: %s", pgErr.Message, pgErr.Detail, pgErr.Where, pgErr.Code, pgErr.SQLState()))
-			rep.log.Error(newErr.Error())
-
 			return nil, newErr
-        }
-        return 
+        }else if err.Error() == storage.CodeNotFound{
+			return nil, storage.ErrNotFound
+		}
+        return nil, err
 	}
 	defer r.Close()
 
 	for r.Next() {
 		var work models.Work
         if err := r.Scan(&work.ID, &work.Name, &work.Date, &work.Price, &work.Time, &work.Penalty); err!= nil {
-			rep.log.Error(err.Error())
             return nil, err
         }
         works = append(works, work)
@@ -125,9 +126,10 @@ func (rep *Repository) Delete(
         if errors.As(err, &pgErr) {
             pgErr = err.(*pgconn.PgError)
             newErr := fmt.Errorf(fmt.Sprintf("SQL Error: %s, Detail: %s, Where: %s, Code: %s, SQLState: %s", pgErr.Message, pgErr.Detail, pgErr.Where, pgErr.Code, pgErr.SQLState()))
-			rep.log.Error(newErr.Error())
 			return newErr
-        }
+        }else if err.Error() == storage.CodeNotFound{
+			return  storage.ErrNotFound
+		}
         return err
     }
 	return nil

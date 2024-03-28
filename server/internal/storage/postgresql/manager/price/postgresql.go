@@ -7,6 +7,7 @@ import (
 	"log/slog"
 
 	models "server/server/internal/models/price"
+	"server/server/internal/storage"
 
 	"github.com/jackc/pgconn"
 	"github.com/jackc/pgx/v4/pgxpool"
@@ -35,9 +36,10 @@ func (rep *Repository) Create(
 		var pgErr *pgconn.PgError
 		if errors.As(err, &pgErr) {
 			pgErr = err.(*pgconn.PgError)
+			if pgErr.Code == storage.CodeAlreadyExists{
+				return storage.ErrAlreadyExists
+			}
 			newErr := fmt.Errorf(fmt.Sprintf("SQL Error: %s, Detail: %s, Where: %s, Code: %s, SQLState: %s", pgErr.Message, pgErr.Detail, pgErr.Where, pgErr.Code, pgErr.SQLState()))
-			rep.log.Error(newErr.Error())
-
 			return newErr
 		}
 		return err
@@ -51,18 +53,18 @@ func (rep *Repository) Update(
 )error{
 	query := "UPDATE prices SET price = $1 WHERE user_id = $2"
 
-	_, err := rep.client.Exec(ctx, query, rec.Price, rec.ID)
+	c, err := rep.client.Exec(ctx, query, rec.Price, rec.ID)
 	if err!= nil {
 		var pgErr *pgconn.PgError
         if errors.As(err, &pgErr) {
             pgErr = err.(*pgconn.PgError)
             newErr := fmt.Errorf(fmt.Sprintf("SQL Error: %s, Detail: %s, Where: %s, Code: %s, SQLState: %s", pgErr.Message, pgErr.Detail, pgErr.Where, pgErr.Code, pgErr.SQLState()))
-			rep.log.Error(newErr.Error())
-
 			return newErr
         }
         return err
-    }
+    }else if c.RowsAffected() == 0 {
+		return storage.ErrNotFound
+	}
 	return nil
 }
 func (rep *Repository) Get(
@@ -76,9 +78,10 @@ func (rep *Repository) Get(
         if errors.As(err, &pgErr) {
             pgErr = err.(*pgconn.PgError)
             newErr := fmt.Errorf(fmt.Sprintf("SQL Error: %s, Detail: %s, Where: %s, Code: %s, SQLState: %s", pgErr.Message, pgErr.Detail, pgErr.Where, pgErr.Code, pgErr.SQLState()))
-			rep.log.Error(newErr.Error())
 			return models.Prices{}, newErr
-        }
+        }else if err.Error() == storage.CodeNotFound{
+			return models.Prices{}, storage.ErrNotFound
+		}
 		return models.Prices{}, err
 	}
 

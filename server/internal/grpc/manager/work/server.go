@@ -4,8 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"strconv"
-	"strings"
 	"time"
 
 	manager1 "server/protos/gen/go/manager"
@@ -18,7 +16,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
-
+// go:generate go run github.com/vektra/mockery/v2@v2.42.0 --name=WorkService
 type WorkService interface {
 	Create(
 		ctx context.Context,
@@ -53,9 +51,8 @@ func Register(gRPC *grpc.Server, work WorkService) {
 
 func (s *serverAPI) Create(ctx context.Context, req *manager1.CreateWorkRequest) (*manager1.CreateWorkResponse, error) {
 	// Handle requests.
-	strErr, err := m.HandleCreate(req)
-	if err != nil {
-		return nil, status.Error(codes.InvalidArgument, strErr)
+	if err := m.HandleCreate(req); err != nil {
+		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 	// Preparing the date.
 	date, err := PrepareDate(req.GetDate())
@@ -65,11 +62,7 @@ func (s *serverAPI) Create(ctx context.Context, req *manager1.CreateWorkRequest)
 	// Create a new record
 	err = s.w.Create(ctx, models.CreateWork{
 		Name:    req.Name,
-		Date:    pgtype.Date{
-			Time: 				date,
-			Status: 			0,
-			InfinityModifier: 	0,
-		},
+		Date:    date,
 		Time:    req.Time,
 		Penalty: req.Penalty,
 		UserID:  req.UserId,
@@ -77,6 +70,8 @@ func (s *serverAPI) Create(ctx context.Context, req *manager1.CreateWorkRequest)
 	if err != nil { 
 		if errors.Is(err, work.ErrAlreadyExists) {
 			return nil, status.Error(codes.AlreadyExists, "already exists")
+		}else if errors.Is(err, work.ErrNotFound) {
+			return nil, status.Error(codes.NotFound, "entity not found")
 		}
 		return nil, status.Error(codes.Internal, "internal error")
 	}
@@ -87,9 +82,8 @@ func (s *serverAPI) Create(ctx context.Context, req *manager1.CreateWorkRequest)
 
 func (s *serverAPI) Update(ctx context.Context, req *manager1.UpdateWorkRequest) (*manager1.UpdateWorkResponse, error) {
 	// Handle requests.
-	strErr, err := m.HandleUpdate(req)
-	if err != nil {
-		return nil, status.Error(codes.InvalidArgument, strErr)
+	if err := m.HandleUpdate(req); err != nil {
+		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 	// Preparing the date.
 	date, err := PrepareDate(req.GetDate())
@@ -100,18 +94,14 @@ func (s *serverAPI) Update(ctx context.Context, req *manager1.UpdateWorkRequest)
 	err = s.w.Update(ctx, models.UpdateWork{
 		ID:      req.Id,
 		Name:    req.Name,
-		Date:    pgtype.Date{
-			Time: 				date,
-			Status: 			0,
-			InfinityModifier: 	0,
-		},
+		Date:    date,
 		Time:    req.Time,
 		Penalty: req.Penalty,
 	})
 	if err != nil { 
 		if errors.Is(err, work.ErrNotFound) {
-            return nil, status.Error(codes.NotFound, "not found")
-        }
+			return nil, status.Error(codes.NotFound, "entity not found")
+		}  
 		return nil, status.Error(codes.Internal, "internal error")
 	}
 	return &manager1.UpdateWorkResponse{
@@ -121,9 +111,8 @@ func (s *serverAPI) Update(ctx context.Context, req *manager1.UpdateWorkRequest)
 
 func (s *serverAPI) GetAll(ctx context.Context, req *manager1.GetWorkRequest) (*manager1.GetAllWorkResponse, error) {
 	// Handle requests.
-	strErr, err := m.HandleGet(req)
-	if err != nil {
-		return nil, status.Error(codes.InvalidArgument, strErr)
+	if err := m.HandleGet(req); err != nil {
+		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 	// Get all records.
 	records, err := s.w.Get(ctx, models.GetAllWork{
@@ -132,7 +121,7 @@ func (s *serverAPI) GetAll(ctx context.Context, req *manager1.GetWorkRequest) (*
 	})
 	if err != nil { 
 		if errors.Is(err, work.ErrNotFound) {
-            return nil, status.Error(codes.NotFound, "not found")
+            return nil, status.Error(codes.NotFound, "entity not found")
         }
 		return nil, status.Error(codes.Internal, "internal error")
 	}
@@ -155,9 +144,8 @@ func (s *serverAPI) GetAll(ctx context.Context, req *manager1.GetWorkRequest) (*
 
 func (s *serverAPI) GetAllByDate(ctx context.Context, req *manager1.GetByDateWorkRequest) (*manager1.GetAllWorkResponse, error) {
 	// Handle requests.
-	strErr, err := m.HandleGetByDate(req)
-	if err != nil {
-		return nil, status.Error(codes.InvalidArgument, strErr)
+	if err := m.HandleGetByDate(req); err != nil {
+		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
     // Get all records.
     records, err := s.w.GetByDate(ctx, models.GetAllWorkByDate{
@@ -167,7 +155,7 @@ func (s *serverAPI) GetAllByDate(ctx context.Context, req *manager1.GetByDateWor
     })
     if err != nil { 
         if errors.Is(err, work.ErrNotFound) {
-            return nil, status.Error(codes.NotFound, "not found")
+            return nil, status.Error(codes.NotFound, "entity not found")
         }
         return nil, status.Error(codes.Internal, "internal error")
     }
@@ -191,17 +179,16 @@ func (s *serverAPI) GetAllByDate(ctx context.Context, req *manager1.GetByDateWor
 
 func (s *serverAPI) Delete(ctx context.Context, req *manager1.DeleteWorkRequest) (*manager1.DeleteWorkResponse, error) {
 	// Handle requests.
-	strErr, err := m.HandleDelete(req)
-	if err != nil {
-		return nil, status.Error(codes.InvalidArgument, strErr)
+	if err := m.HandleDelete(req); err != nil {
+		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 	// Delete a record.
-	err = s.w.Delete(ctx, models.DeleteWork{
+	err := s.w.Delete(ctx, models.DeleteWork{
 		ID: req.Id,
 	})
 	if err != nil { 
 		if errors.Is(err, work.ErrNotFound) {
-            return nil, status.Error(codes.NotFound, "not found")
+            return nil, status.Error(codes.NotFound, "entity not found")
         }
 		return nil, status.Error(codes.Internal, "internal error")
 	}
@@ -210,25 +197,19 @@ func (s *serverAPI) Delete(ctx context.Context, req *manager1.DeleteWorkRequest)
 	}, nil
 }
 
-func PrepareDate(date string) (time time.Time, err error){
-	arrDate := strings.Split(date, "-")
-	year, err := strconv.Atoi(arrDate[0])
+func PrepareDate(date string) (pgtype.Date, error){
+	format := "2006-01-02" 
+	t, err := time.Parse(format, date)
 	if err!= nil {
-        return time, err
-    }
-	month, err := strconv.Atoi(arrDate[1])
-	if err!= nil {
-        return time, err
-    }
-	day, err := strconv.Atoi(arrDate[2])
-	if err!= nil {
-        return time, err
-    }
-	time = time.AddDate(year-1, month-1, day-1)
-	return time, nil
+        return pgtype.Date{}, err
+    }	
+	return pgtype.Date{
+		Time: t,
+		Status: 0,
+        InfinityModifier: 0,
+	}, nil
 }
 
 func GetDate(time time.Time) string {
-	
 	return fmt.Sprintf("%s %d, %d", time.Month().String(), time.Day(), time.Year())
 }

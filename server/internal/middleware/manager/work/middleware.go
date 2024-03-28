@@ -1,6 +1,10 @@
 package workmiddleware
 
-import manager1 "server/protos/gen/go/manager"
+import (
+	"fmt"
+	manager1 "server/protos/gen/go/manager"
+	"time"
+)
 
 const (
 	emptyVar 		= 0
@@ -12,75 +16,81 @@ const (
 	invalidPenalty 	= "penalty is invalid"
 )
 
-func HandleCreate(req *manager1.CreateWorkRequest)(string, error) {
+func HandleCreate(req *manager1.CreateWorkRequest) error {
 
 	if req.GetUserId() == emptyVar {
-		return invalidUserID, nil
+		return fmt.Errorf(invalidUserID)
 	}
 	if req.GetTime() == emptyVar {
-		return invalidTime, nil
+		return fmt.Errorf(invalidTime)
 	}
-	if req.GetPenalty() == emptyVar {
-		return invalidPenalty, nil
+	if req.GetPenalty() < 0 {
+		return fmt.Errorf(invalidPenalty)
 	}
 	if req.GetDate() == "" {
-		return invalidDate, nil
+		return fmt.Errorf(invalidDate)
 	}
 	if req.GetName() == "" {
-		return invalidName, nil
+		return fmt.Errorf(invalidName)
 	}
-	return "", nil
+	if _, err := time.Parse("2006-01-02", req.GetDate()); err != nil {
+		return fmt.Errorf(invalidDate)
+    }
+	return nil
 }
 
-func HandleUpdate(req *manager1.UpdateWorkRequest)(string, error) {
+func HandleUpdate(req *manager1.UpdateWorkRequest) error {
 
 	if req.GetId() == emptyVar {
-		return invalidID, nil
+		return fmt.Errorf(invalidID)
 	}
 	if req.GetTime() == emptyVar {
-		return invalidTime, nil
+		return fmt.Errorf(invalidTime)
 	}
-	if req.GetPenalty() == emptyVar {
-		return invalidPenalty, nil
-	}
-	if req.GetDate() == "" {
-		return invalidDate, nil
-	}
-	if req.GetName() == "" {
-		return invalidName, nil
-	}
-	return "", nil
-}
-
-func HandleGet(req *manager1.GetWorkRequest)(string, error) {
-
-	if req.GetUserId() == emptyVar {
-		return invalidUserID, nil
-	}
-	if req.GetName() == "" {
-		return invalidName, nil
-	}
-	return "", nil
-}
-
-func HandleGetByDate(req *manager1.GetByDateWorkRequest)(string, error) {
-
-	if req.GetUserId() == emptyVar {
-		return invalidUserID, nil
-	}
-	if req.GetName() == "" {
-		return invalidName, nil
+	if req.GetPenalty() < 0 {
+		return fmt.Errorf(invalidPenalty)
 	}
 	if req.GetDate() == "" {
-		return invalidDate, nil
+		return fmt.Errorf(invalidDate)
 	}
-	return "", nil
+	if req.GetName() == "" {
+		return fmt.Errorf(invalidName)
+	}
+	if _, err := time.Parse("2006-01-02", req.GetDate()); err != nil {
+		return fmt.Errorf(invalidDate)
+    }
+	return nil
 }
 
-func HandleDelete(req *manager1.DeleteWorkRequest)(string, error) {
+func HandleGet(req *manager1.GetWorkRequest) error {
+
+	if req.GetUserId() == emptyVar {
+		return fmt.Errorf(invalidUserID)
+	}
+	if req.GetName() == "" {
+		return fmt.Errorf(invalidName)
+	}
+	return nil
+}
+
+func HandleGetByDate(req *manager1.GetByDateWorkRequest) error {
+
+	if req.GetUserId() == emptyVar {
+		return fmt.Errorf(invalidUserID)
+	}
+	if req.GetName() == "" {
+		return fmt.Errorf(invalidName)
+	}
+	if req.GetDate() == "" {
+		return fmt.Errorf(invalidDate)
+	}
+	return nil
+}
+
+func HandleDelete(req *manager1.DeleteWorkRequest) error {
 
 	if req.GetId() == emptyVar {
-		return invalidID, nil
+		return fmt.Errorf(invalidID)
 	}
-	return "", nil
+	return nil
 }

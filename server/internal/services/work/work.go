@@ -10,7 +10,8 @@ import (
 	"server/server/internal/storage"
 )
 
-type RepositoryWork interface {
+// go:generate go run github.com/vektra/mockery/v2@v2.42.0 --name=WorkRepository
+type WorkRepository interface {
 	Create(
 		ctx context.Context,
 		rec *models.CreateWork,
@@ -38,10 +39,10 @@ var (
 
 type Works struct {
 	log *slog.Logger
-	rep RepositoryWork
+	rep WorkRepository
 }
 
-func New(rep RepositoryWork, log *slog.Logger) *Works {
+func New(rep WorkRepository, log *slog.Logger) *Works {
 	return &Works{
 		log: log,
 		rep: rep,
@@ -57,10 +58,13 @@ func (w *Works) Create(
 
 	if err := w.rep.Create(ctx, &rec); err != nil {
 		if errors.Is(err, storage.ErrAlreadyExists) {
-			w.log.Error(err.Error())
+			w.log.Error("%s: %v", op, err)
 			return ErrAlreadyExists
+		} else if errors.Is(err, storage.ErrNotFound) {
+			w.log.Error("%s: %v", op, err)
+			return ErrNotFound
 		}
-		w.log.Error(err.Error())
+		w.log.Error("%s: %v", op, err)
 		return err
 	}
 
@@ -75,8 +79,10 @@ func (w *Works) Update(
 
 	if err := w.rep.Update(ctx, &rec); err != nil {
 		if errors.Is(err, storage.ErrNotFound) {
+			w.log.Error("%s: %v", op, err)
 			return ErrNotFound
 		}
+		w.log.Error("%s: %v", op, err)
 		return err
 	}
 
@@ -92,8 +98,10 @@ func (w *Works) Get(
 	works, err := w.rep.GetAll(ctx, &rec)
 	if err != nil {
 		if errors.Is(err, storage.ErrNotFound) {
+			w.log.Error("%s: %v", op, err)
 			return []models.Work{}, ErrNotFound
 		}
+		w.log.Error("%s: %v", op, err)
 		return []models.Work{}, err
 	}
 	return works, nil
@@ -107,13 +115,14 @@ func (w *Works) GetByDate(
 
 	works, err := w.rep.GetAll(ctx, &models.GetAllWork{
 		UserID: rec.UserID,
-        Name:   rec.Name,
+		Name:   rec.Name,
 	})
 	if err != nil {
 		if errors.Is(err, storage.ErrNotFound) {
+			w.log.Error("%s: %v", op, err)
 			return []models.Work{}, ErrNotFound
 		}
-		w.log.Error(err.Error())
+		w.log.Error("%s: %v", op, err)
 		return []models.Work{}, err
 	}
 	return SortByMonth(&works, rec.Date), nil
@@ -127,8 +136,10 @@ func (w *Works) Delete(
 
 	if err := w.rep.Delete(ctx, &rec); err != nil {
 		if errors.Is(err, storage.ErrNotFound) {
+			w.log.Error("%s: %v", op, err)
 			return ErrNotFound
 		}
+		w.log.Error("%s: %v", op, err)
 		return err
 	}
 
@@ -136,10 +147,10 @@ func (w *Works) Delete(
 }
 
 func SortByMonth(w *[]models.Work, month string) (works []models.Work) {
-    for _, i := range *w{
-		if  strings.EqualFold(i.Date.Time.Month().String(), month){
+	for _, i := range *w {
+		if strings.EqualFold(i.Date.Time.Month().String(), month) {
 			works = append(works, i)
 		}
 	}
-    return
+	return
 }
