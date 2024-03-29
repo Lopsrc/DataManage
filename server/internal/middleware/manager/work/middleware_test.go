@@ -83,7 +83,7 @@ func TestCreate_FailCases(t *testing.T) {
             msgError: invalidName,
 		},
 		{
-			description: "invalid date",
+			description: "invalid date(empty)",
             userId: 1,
 			name: "workspace",
             date: "",
@@ -91,6 +91,15 @@ func TestCreate_FailCases(t *testing.T) {
             penalty: 0,
             msgError: invalidDate,
 		},
+		{
+			description: "invalid date",
+            userId: 1,
+			name: "workspace",
+			date: "<INVALID-DATE>",
+			time: 8,
+            penalty: 0,
+            msgError: invalidDate,
+        },
 		{
 			description: "invalid time",
             userId: 1,
@@ -105,13 +114,13 @@ func TestCreate_FailCases(t *testing.T) {
             userId: 1,
 			name: "workspace",
             date: "2013-01-01",
-            time: 0,
+            time: 8,
             penalty: -1,
             msgError: invalidPenalty,
 		},
 	}
 	for _, c := range cases {
-		t.Run(c.name, func(t *testing.T) {
+		t.Run(c.description, func(t *testing.T) {
             err := HandleCreate(&manager1.CreateWorkRequest{
 				UserId: c.userId,
                 Name: c.name,
@@ -153,7 +162,7 @@ func TestUpdate_FailCases(t *testing.T) {
             msgError: invalidName,
 		},
 		{
-			description: "invalid date",
+			description: "invalid date(empty)",
 			name: "workspace",
             date: "",
             time: 8,
@@ -161,6 +170,15 @@ func TestUpdate_FailCases(t *testing.T) {
 			id: 1,
             msgError: invalidDate,
 		},
+		{
+			description: "invalid date",
+			name: "workspace",
+			date: "<INVALID-DATE>",
+			time: 8,
+            penalty: 0,
+			id: 1,
+            msgError: invalidDate,
+        },
 		{
 			description: "invalid time",
 			name: "workspace",
@@ -174,14 +192,14 @@ func TestUpdate_FailCases(t *testing.T) {
 			description: "invalid penalty",
 			name: "workspace",
             date: "2013-01-01",
-            time: 0,
+            time: 8,
             penalty: -1,
 			id: 1,
             msgError: invalidPenalty,
 		},
 	}
 	for _, c := range cases {
-		t.Run(c.name, func(t *testing.T) {
+		t.Run(c.description, func(t *testing.T) {
             err := HandleUpdate(&manager1.UpdateWorkRequest{
 				Id: c.id,
                 Name: c.name,
@@ -222,7 +240,7 @@ func TestGet_FailCases(t *testing.T) {
         },
 	}
 	for _, c := range cases {
-		t.Run(c.name, func(t *testing.T) {
+		t.Run(c.description, func(t *testing.T) {
             err := HandleGet(&manager1.GetWorkRequest{
                 UserId: c.userId,
 				Name: c.name,
@@ -248,9 +266,16 @@ func TestGetByDate_FailCases(t *testing.T) {
             msgError: invalidUserID,
         },
 		{
-			description: "invalid date",
+			description: "invalid date(empty)",
             userId: 1,
 			date: "",
+			name: "workspace",
+            msgError: invalidDate,
+        },
+		{
+			description: "invalid date",
+            userId: 1,
+			date: "<INVALID-DATE>",
 			name: "workspace",
             msgError: invalidDate,
         },
@@ -270,12 +295,35 @@ func TestGetByDate_FailCases(t *testing.T) {
         },
 	}
 	for _, c := range cases {
-		t.Run(c.name, func(t *testing.T) {
-            err := HandleGet(&manager1.GetWorkRequest{
+		t.Run(c.description, func(t *testing.T) {
+            err := HandleGetByDate(&manager1.GetByDateWorkRequest{
                 UserId: c.userId,
 				Name: c.name,
+				Date: c.date,
             })
             assert.EqualError(t, err, c.msgError)
         })
 	}
+}
+
+func TestDelete_FailCases(t *testing.T) {
+	cases := []struct{
+        description string
+        id int64
+        msgError string
+    }{
+        {
+            description: "invalid id",
+            id: 0,
+            msgError: invalidID,
+        },
+    }
+    for _, c := range cases {
+        t.Run(c.description, func(t *testing.T) {
+            err := HandleDelete(&manager1.DeleteWorkRequest{
+                Id: c.id,
+            })
+            assert.EqualError(t, err, c.msgError)
+        })
+    }
 }

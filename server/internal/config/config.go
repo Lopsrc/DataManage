@@ -2,6 +2,7 @@ package config
 
 import (
 	"sync"
+	"time"
 
 	"github.com/ilyakaznacheev/cleanenv"
 )
@@ -9,11 +10,10 @@ import (
 
 type Config struct {
 	Env     string `yaml:"env" env-default:"local"`
-	Listen  struct {
-		Type   string `yaml:"type" env-default:"port"`
-		BindIP string `yaml:"bind_ip" env-default:"127.0.0.1"`
+	GRPC  struct {
 		Port   string `yaml:"port" env-default:"8080"`
-	} `yaml:"listen"`
+		Timeout time.Duration `yaml:"timeout" env-default:"10h"`
+	} `yaml:"grpc"`
 	Storage StorageConfig `yaml:"storage"`
 }
 

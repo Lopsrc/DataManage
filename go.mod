@@ -1,6 +1,8 @@
 module server
 
-go 1.20
+go 1.21
+
+toolchain go1.21.6
 
 require github.com/ilyakaznacheev/cleanenv v1.5.0
 
@@ -29,6 +31,7 @@ require (
 )
 
 require (
+	github.com/brianvoe/gofakeit/v6 v6.28.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/stretchr/objx v0.5.2 // indirect

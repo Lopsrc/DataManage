@@ -1,4 +1,4 @@
-package price
+package priceservice
 
 import (
 	"context"

@@ -29,7 +29,7 @@ func main() {
         panic(err)
     }
 
-	application := grpc_.New(log, cfg.Listen.Port, postgreSQLClient)
+	application := grpc_.New(log, cfg.GRPC.Port, postgreSQLClient)
 
 	go func() {
 		application.GRPCServer.MustRun()
