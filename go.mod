@@ -31,13 +31,14 @@ require (
 )
 
 require (
-	github.com/brianvoe/gofakeit/v6 v6.28.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/lib/pq v1.10.9 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/stretchr/objx v0.5.2 // indirect
 )
 
 require (
+	github.com/brianvoe/gofakeit/v6 v6.28.0
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/jackc/pgtype v1.14.0
 	github.com/jackc/puddle v1.3.0 // indirect

@@ -1,1 +1,1 @@
-go run server/cmd/tests/main.go
+go run server/cmd/test/main.go

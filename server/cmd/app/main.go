@@ -12,10 +12,10 @@ import (
 )
 
 const (
-	pathConfig = "server/config/local.yaml"
-	envLocal   			= "local"
-	envDev     			= "dev"
-	envProd    			= "prod"
+	pathConfig 	= "server/config/local.yaml"
+	envLocal   	= "local"
+	envDev     	= "dev"
+	envProd    	= "prod"
 )
 
 func main() {
