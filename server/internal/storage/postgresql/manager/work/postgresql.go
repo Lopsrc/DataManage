@@ -13,20 +13,18 @@ import (
 	"github.com/jackc/pgx/v4/pgxpool"
 )
 
-
-
 type Repository struct{
 	log *slog.Logger
 	client *pgxpool.Pool
 }
-
+// New creates a new instance of the repository.
 func New(client *pgxpool.Pool, log *slog.Logger) *Repository {
 	return &Repository{
 		log: log,
 		client: client,
 	}
 }
-
+// Create creates a new work record.
 func (rep *Repository) Create(
 	ctx context.Context,
 	rec *models.CreateWork,
@@ -62,6 +60,7 @@ func (rep *Repository) Create(
 
 	return nil
 }
+// Update updates an existing work record.
 func (rep *Repository) Update(
 	ctx context.Context,
 	rec *models.UpdateWork,
@@ -83,6 +82,7 @@ func (rep *Repository) Update(
 	}
 	return nil
 }
+// Get retrieves a work based on the given criteria.
 func (rep *Repository) GetAll(
 	ctx context.Context,
 	rec *models.GetAllWork,
@@ -113,7 +113,7 @@ func (rep *Repository) GetAll(
     }
 	return 
 }
-
+// Delete deletes an existing work record.
 func (rep *Repository) Delete(
 	ctx context.Context,
 	rec *models.DeleteWork,

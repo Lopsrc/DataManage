@@ -36,14 +36,14 @@ type Prices struct {
 	log *slog.Logger
 	rep PriceRepository
 }
-
+// New initializes a new Prices instance.
 func New(rep PriceRepository, log *slog.Logger) *Prices {
 	return &Prices{
 		log: log,
 		rep: rep,
 	}
 }
-
+// Create creates a new price record.
 func (p *Prices) Create(
 	ctx context.Context,
 	rec models.CreatePrice,
@@ -61,7 +61,7 @@ func (p *Prices) Create(
 	}
 	return nil
 }
-
+// Update updates an existing price record.
 func (p *Prices) Update(
 	ctx context.Context,
 	rec models.UpdatePrice,
@@ -79,7 +79,7 @@ func (p *Prices) Update(
 	}
 	return nil
 }
-
+// Get retrieves a price based on the given criteria.
 func (p *Prices) Get(
 	ctx context.Context,
 	rec models.GetPrice,

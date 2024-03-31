@@ -16,7 +16,7 @@ const (
 	invalidTime 	= "time is invalid"
 	invalidPenalty 	= "penalty is invalid"
 )
-
+// HandleCreate handles the creation of a new work record.
 func HandleCreate(req *manager1.CreateWorkRequest) error {
 	if req.GetUserId() == emptyVar || req.GetUserId() < 0{
 		return fmt.Errorf(invalidUserID)
@@ -38,7 +38,7 @@ func HandleCreate(req *manager1.CreateWorkRequest) error {
     }
 	return nil
 }
-
+// HandleUpdate handles the update of the work record.
 func HandleUpdate(req *manager1.UpdateWorkRequest) error {
 
 	if req.GetId() == emptyVar || req.GetId() < 0{
@@ -61,7 +61,7 @@ func HandleUpdate(req *manager1.UpdateWorkRequest) error {
     }
 	return nil
 }
-
+// HandleGet handles the request for getting a work record.
 func HandleGet(req *manager1.GetWorkRequest) error {
 
 	if req.GetUserId() == emptyVar || req.GetUserId() < 0{
@@ -72,7 +72,7 @@ func HandleGet(req *manager1.GetWorkRequest) error {
 	}
 	return nil
 }
-
+// HandleGetByDate handles the request for getting a work record using date.
 func HandleGetByDate(req *manager1.GetByDateWorkRequest) error {
 
 	if req.GetUserId() == emptyVar || req.GetUserId() < 0{
@@ -89,14 +89,15 @@ func HandleGetByDate(req *manager1.GetByDateWorkRequest) error {
     }
 	return nil
 }
-
+// HandleDelete handles the deletion of a work record.
 func HandleDelete(req *manager1.DeleteWorkRequest) error {
 	if req.GetId() == emptyVar || req.GetId() < 0{
 		return fmt.Errorf(invalidID)
 	}
 	return nil
 }
-
+// ParseMonth checks if the month is a valid month in the year.
+// It returns an error if the month is not a valid month.
 func ParseMonth(month string) error{
 	if strings.EqualFold(month, time.January.String()) || strings.EqualFold(month, time.February.String()) ||
 		strings.EqualFold(month, time.March.String()) || strings.EqualFold(month, time.April.String()) ||

@@ -28,6 +28,10 @@ type StorageConfig struct {
 var instance *Config
 var once sync.Once
 
+// GetConfig returns the global instance of Config.
+// It initializes the instance the first time it is called,
+// using the provided path to the configuration file.
+// If the initialization fails, it panics with the error.
 func GetConfig(pathConfig string) *Config {
 	once.Do(func() {
 		instance = &Config{}

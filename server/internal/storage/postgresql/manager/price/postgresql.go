@@ -17,14 +17,15 @@ type Repository struct{
 	log *slog.Logger
 	client *pgxpool.Pool
 }
-
+// New creates a new instance of the PostgreSQL price repository.
 func New(client *pgxpool.Pool, log *slog.Logger) *Repository {
 	return &Repository{
 		log: log,
 		client: client,
 	}
 }
-
+// Create adds a new price to the database.
+// If a price with the same user ID already exists, ErrAlreadyExists is returned.
 func (rep *Repository) Create(
 	ctx context.Context,
 	rec *models.CreatePrice,
@@ -47,6 +48,8 @@ func (rep *Repository) Create(
 
 	return nil
 }
+// Update updates an existing price in the database.
+// If the price does not exist, ErrNotFound is returned.
 func (rep *Repository) Update(
 	ctx context.Context,
 	rec *models.UpdatePrice,
@@ -67,6 +70,8 @@ func (rep *Repository) Update(
 	}
 	return nil
 }
+// Get retrieves a price for a given user ID.
+// If no price exists for the given user ID, ErrNotFound is returned.
 func (rep *Repository) Get(
 	ctx context.Context,
 	rec *models.GetPrice,

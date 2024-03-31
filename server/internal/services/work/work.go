@@ -41,14 +41,16 @@ type Works struct {
 	log *slog.Logger
 	rep WorkRepository
 }
-
+// New creates a new instance of Works.
 func New(rep WorkRepository, log *slog.Logger) *Works {
 	return &Works{
 		log: log,
 		rep: rep,
 	}
 }
-
+// Create creates a new work record.
+// If the work record already exists, ErrAlreadyExists is returned.
+// If any other error occurs, it is returned.
 func (w *Works) Create(
 	ctx context.Context,
 	rec models.CreateWork,
@@ -70,6 +72,9 @@ func (w *Works) Create(
 
 	return nil
 }
+// Update updates an existing work record.
+// If the work record does not exist, ErrNotFound is returned.
+// If any other error occurs, it is returned.
 func (w *Works) Update(
 	ctx context.Context,
 	rec models.UpdateWork,
@@ -88,6 +93,9 @@ func (w *Works) Update(
 
 	return nil
 }
+// Get retrieves all work records.
+// If no records exist, an empty slice is returned.
+// If an error occurs, it is returned.
 func (w *Works) Get(
 	ctx context.Context,
 	rec models.GetAllWork,
@@ -106,6 +114,9 @@ func (w *Works) Get(
 	}
 	return works, nil
 }
+// GetByDate retrieves all work records based on the date.
+// If no records exist, an empty slice is returned.
+// If an error occurs, it is returned.
 func (w *Works) GetByDate(
 	ctx context.Context,
 	rec models.GetAllWorkByDate,
@@ -127,6 +138,9 @@ func (w *Works) GetByDate(
 	}
 	return SortByMonth(&works, rec.Date), nil
 }
+// Delete deletes an existing work record.
+// If the work record does not exist, ErrNotFound is returned.
+// If any other error occurs, it is returned.
 func (w *Works) Delete(
 	ctx context.Context,
 	rec models.DeleteWork,
@@ -145,7 +159,8 @@ func (w *Works) Delete(
 
 	return nil
 }
-
+// SortByMonth sorts a slice of Work structs by month.
+// It returns a new slice of Work structs.
 func SortByMonth(w *[]models.Work, month string) (works []models.Work) {
 	for _, i := range *w {
 		if strings.EqualFold(i.Date.Time.Month().String(), month) {

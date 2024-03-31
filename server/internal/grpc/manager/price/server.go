@@ -32,11 +32,11 @@ type serverAPI struct {
 	manager1.UnimplementedManagerPriceServer
 	p PriceService
 }
-
+// Register registers the gRPC server to handle requests.
 func Register(gRPC *grpc.Server, price PriceService) {
 	manager1.RegisterManagerPriceServer(gRPC, &serverAPI{p: price})
 }
-
+// Create handles the CreatePrice gRPC method.
 func (s *serverAPI) Create(ctx context.Context, req *manager1.CreatePriceRequest) (*manager1.CreatePriceResponse, error){
 	// Handle request
 	err := m.HandleCreate(req)
@@ -58,7 +58,7 @@ func (s *serverAPI) Create(ctx context.Context, req *manager1.CreatePriceRequest
 		IsCreate: true,
 	}, nil
 }
-
+// Update handles the UpdatePrice gRPC method.
 func (s *serverAPI) Update(ctx context.Context, req *manager1.UpdatePriceRequest) (*manager1.UpdatePriceResponse, error){
 	// Handle request
 	err := m.HandleUpdate(req)
@@ -80,14 +80,14 @@ func (s *serverAPI) Update(ctx context.Context, req *manager1.UpdatePriceRequest
 		IsUpdate: true,
 	}, nil
 }
-
+// Get handles the GetPrice gRPC method.
 func (s *serverAPI) Get(ctx context.Context, req *manager1.GetPriceRequest) (*manager1.GetPriceResponse, error) {
 	// Handle request
 	err := m.HandleGet(req)
     if err!= nil{
         return nil, status.Error(codes.InvalidArgument, err.Error())
     }
-    // Get a record.
+    // Get records.
     rec, err := s.p.Get(ctx, models.GetPrice{
         ID: req.UserId,
     })

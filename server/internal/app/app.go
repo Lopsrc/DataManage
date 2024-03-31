@@ -15,7 +15,7 @@ import (
 type App struct{
 	GRPCServer *grpc_.App
 }
-
+// New creates a new instance of the application
 func New(log *slog.Logger, grpcPort string, pconn *pgxpool.Pool) *App{
 
 	storageWork := sqlwork.New(pconn, log)

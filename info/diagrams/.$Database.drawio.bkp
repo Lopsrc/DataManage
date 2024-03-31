@@ -1,4 +1,4 @@
-<mxfile host="Electron" modified="2024-03-24T08:28:13.342Z" agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/24.0.4 Chrome/120.0.6099.109 Electron/28.1.0 Safari/537.36" etag="S1mHoipPFzLVRRFraAzb" version="24.0.4" type="device">
+<mxfile host="Electron" modified="2024-03-24T08:29:44.150Z" agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/24.0.4 Chrome/120.0.6099.109 Electron/28.1.0 Safari/537.36" etag="20BhvqqJzS_Y1EBtANrL" version="24.0.4" type="device">
   <diagram name="Page-1" id="-S48uvGDNK069cQVa7kJ">
     <mxGraphModel dx="1434" dy="838" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
@@ -103,7 +103,7 @@
             <mxRectangle width="210" height="30" as="alternateBounds" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="Ee7Y3M4xubzBsLbzwCd5-56" value="Table" style="shape=table;startSize=30;container=1;collapsible=1;childLayout=tableLayout;fixedRows=1;rowLines=0;fontStyle=1;align=center;resizeLast=1;html=1;" parent="1" vertex="1">
+        <mxCell id="Ee7Y3M4xubzBsLbzwCd5-56" value="&lt;font style=&quot;font-size: 20px;&quot;&gt;Work&lt;/font&gt;" style="shape=table;startSize=30;container=1;collapsible=1;childLayout=tableLayout;fixedRows=1;rowLines=0;fontStyle=1;align=center;resizeLast=1;html=1;" parent="1" vertex="1">
           <mxGeometry x="70" y="230" width="330" height="240" as="geometry" />
         </mxCell>
         <mxCell id="Ee7Y3M4xubzBsLbzwCd5-57" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;top=0;left=0;right=0;bottom=1;" parent="Ee7Y3M4xubzBsLbzwCd5-56" vertex="1">
@@ -197,7 +197,7 @@
             <mxRectangle width="270" height="30" as="alternateBounds" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="Ee7Y3M4xubzBsLbzwCd5-87" value="Table" style="shape=table;startSize=30;container=1;collapsible=1;childLayout=tableLayout;fixedRows=1;rowLines=0;fontStyle=1;align=center;resizeLast=1;html=1;" parent="1" vertex="1">
+        <mxCell id="Ee7Y3M4xubzBsLbzwCd5-87" value="&lt;font style=&quot;font-size: 20px;&quot;&gt;Price&lt;/font&gt;" style="shape=table;startSize=30;container=1;collapsible=1;childLayout=tableLayout;fixedRows=1;rowLines=0;fontStyle=1;align=center;resizeLast=1;html=1;" parent="1" vertex="1">
           <mxGeometry x="540" y="230" width="270" height="90" as="geometry" />
         </mxCell>
         <mxCell id="Ee7Y3M4xubzBsLbzwCd5-88" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;top=0;left=0;right=0;bottom=1;" parent="Ee7Y3M4xubzBsLbzwCd5-87" vertex="1">

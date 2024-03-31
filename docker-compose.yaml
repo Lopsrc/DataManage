@@ -3,20 +3,25 @@ version: '3.9'
 services:
 
   db:
+    container_name: postgres_m
     image: postgres:latest
     restart: always
     volumes:
       - ./.database/postgres/data:/var/lib/postgresql/data
     environment:
-      POSTGRES_PASSWORD: postgres
+      - POSTGRES_USER="postgres"
+      - POSTGRES_PASSWORD="postgres"
     ports:
       - 5436:5432
 
   datamanage:
+    container_name: manager 
     build: ./
+    restart: always
     ports:
       - "8080:8080"
     depends_on:
       - db
+    # command: ./migrate.sh docker
     environment:
       POSTGRES_PASSWORD: postgres

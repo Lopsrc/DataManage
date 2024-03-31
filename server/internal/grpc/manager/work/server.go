@@ -44,11 +44,14 @@ type serverAPI struct {
 	manager1.UnimplementedManagerWorkServer
 	w WorkService
 }
-
+// Register registers the gRPC server for the work service.
 func Register(gRPC *grpc.Server, work WorkService) {
 	manager1.RegisterManagerWorkServer(gRPC, &serverAPI{w: work})
 }
-
+// Create creates a new work record.
+// If the record already exists, ErrAlreadyExists is returned.
+// If the request is invalid, ErrInvalidRequest is returned.
+// If an internal error occurs, ErrInternal is returned.
 func (s *serverAPI) Create(ctx context.Context, req *manager1.CreateWorkRequest) (*manager1.CreateWorkResponse, error) {
 	// Handle requests.
 	if err := m.HandleCreate(req); err != nil {
@@ -79,7 +82,10 @@ func (s *serverAPI) Create(ctx context.Context, req *manager1.CreateWorkRequest)
 		IsCreate: true,
 	}, nil
 }
-
+// Update updates an existing work record.
+// If the record does not exist, ErrNotFound is returned.
+// If the request is invalid, ErrInvalidRequest is returned.
+// If an internal error occurs, ErrInternal is returned.
 func (s *serverAPI) Update(ctx context.Context, req *manager1.UpdateWorkRequest) (*manager1.UpdateWorkResponse, error) {
 	// Handle requests.
 	if err := m.HandleUpdate(req); err != nil {
@@ -108,7 +114,9 @@ func (s *serverAPI) Update(ctx context.Context, req *manager1.UpdateWorkRequest)
 		IsUpdate: true,
 	}, nil
 }
-
+// GetAll returns all work records that match the given filter criteria.
+// If no criteria are specified, all records are returned.
+// If an error occurs, an internal server error is returned.
 func (s *serverAPI) GetAll(ctx context.Context, req *manager1.GetWorkRequest) (*manager1.GetAllWorkResponse, error) {
 	// Handle requests.
 	if err := m.HandleGet(req); err != nil {
@@ -141,7 +149,9 @@ func (s *serverAPI) GetAll(ctx context.Context, req *manager1.GetWorkRequest) (*
 		ListWorks: sliceWorks,
 	}, nil
 }
-
+// GetAllByDate returns all work records that match the given filter criteria.
+// If no criteria are specified, all records are returned.
+// If an error occurs, an internal server error is returned.
 func (s *serverAPI) GetAllByDate(ctx context.Context, req *manager1.GetByDateWorkRequest) (*manager1.GetAllWorkResponse, error) {
 	// Handle requests.
 	if err := m.HandleGetByDate(req); err != nil {
@@ -176,7 +186,10 @@ func (s *serverAPI) GetAllByDate(ctx context.Context, req *manager1.GetByDateWor
 		ListWorks: sliceWorks,
 	}, nil
 }
-
+// Delete deletes a work record.
+// If the record does not exist, ErrNotFound is returned.
+// If the request is invalid, ErrInvalidRequest is returned.
+// If an internal error occurs, ErrInternal is returned.
 func (s *serverAPI) Delete(ctx context.Context, req *manager1.DeleteWorkRequest) (*manager1.DeleteWorkResponse, error) {
 	// Handle requests.
 	if err := m.HandleDelete(req); err != nil {
@@ -196,7 +209,7 @@ func (s *serverAPI) Delete(ctx context.Context, req *manager1.DeleteWorkRequest)
 		IsDel: true,
 	}, nil
 }
-
+// PrepareDate takes a date string in the format "2006-01-02" and returns a pgtype.Date struct.
 func PrepareDate(date string) (pgtype.Date, error){
 	format := "2006-01-02" 
 	t, err := time.Parse(format, date)
@@ -209,7 +222,7 @@ func PrepareDate(date string) (pgtype.Date, error){
         InfinityModifier: 0,
 	}, nil
 }
-
+// GetDate returns the date in the format "January 2, 2006"
 func GetDate(time time.Time) string {
 	return fmt.Sprintf("%s %d, %d", time.Month().String(), time.Day(), time.Year())
 }

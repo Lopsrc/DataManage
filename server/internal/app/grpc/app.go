@@ -16,7 +16,7 @@ type App struct {
 	gRPCServer *grpc.Server
 	port       string
 }
-
+// New creates a new instance of the application.
 func New(log *slog.Logger, w work.WorkService, p price.PriceService , port string) *App {
 	gRPCServer := grpc.NewServer()
 	work.Register(gRPCServer, w)
@@ -28,13 +28,13 @@ func New(log *slog.Logger, w work.WorkService, p price.PriceService , port strin
 		port:       port,
 	}
 }
-// Run gRPC server.
+// MustRun is must run the application.
 func (app *App) MustRun() {
 	if err := app.Run(); err != nil {
 		panic(err)
 	}
 }
-
+// Run gRPC server.
 func (app *App) Run() error {
 
 	listener, err := net.Listen("tcp", fmt.Sprintf(":%s", app.port))

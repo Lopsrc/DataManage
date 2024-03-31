@@ -1,18 +1,19 @@
 #!/bin/bash
 
 sel=$1
+hostremote=db
+localhost=localhost
 # create db.
 
 if [[ "$sel" == "local" ]]; then
-    PGPASSWORD=postgres psql -h localhost -p 5432 -U postgres -c "IF EXISTS (SELECT FROM pg_database WHERE datname = 'datamanage') THEN
-            RAISE NOTICE 'Database already exists';  -- optional
-        ELSE
-            PERFORM dblink_exec('dbname=' || current_database()  -- current db
-                            , 'CREATE DATABASE datamanage');
-        END IF;
-    END"
+    PGPASSWORD=postgres psql -h "$localhost" -p 5432 -U postgres -c "SELECT 'CREATE DATABASE datamanage'
+WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'datamanage')"
+    PGPASSWORD=postgres psql -h "$localhost" -p 5432 -U postgres -d datamanage -a -f "server/migrations/1_init.up.sql"
 elif [[ "$sel" == "docker" ]]; then
-    psql -h db -p 5432 -U postgres
+    PGPASSWORD=postgres psql -h "$hostremote" -p 5432 -U postgres -c "SELECT 'CREATE DATABASE datamanage'
+WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'datamanage')"
+    PGPASSWORD=postgres psql -h "$hostremote" -p 5432 -U postgres -d datamanage -a -f "server/migrations/1_init.up.sql"
 else
-    echo "Fuck you."
+    echo "Invalid parameters.
+Example: ./migrate.sh local"
 fi
